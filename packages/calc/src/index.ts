@@ -3,7 +3,7 @@ type Organization = {
   preMoneyValuation: number;
   newMoneyRaised: number;
   noteConversion: boolean;
-  notesConverttoNewClass: boolean;
+  notesConvertToNewClass: boolean;
   expandOptionPool: boolean;
   postMoneyOptionPoolSize: number;
   notes: Note[];
@@ -67,6 +67,7 @@ class CapTable implements CapTableInterface {
   }
 
   calculate() {
+    // order matters
     this.shareClasses = this.calcShareClasses();
     this.totalPreMoneyShares = this.calcTotalPreMoneyShares();
     this.totalPreMoneyPercentOwnership = 0;
@@ -97,13 +98,9 @@ class CapTable implements CapTableInterface {
   }
 
   calcTotalPreMoneyShares() {
-    return this.organization.preMoneyShareClasses
-      .map((input: { name: string; numberOfShares: number }) => {
-        return input.numberOfShares;
-      })
-      .reduce((total: number, numberOfShares: number) => {
-        return total + numberOfShares;
-      }, 0);
+    return this.shareClasses.reduce((sum: number, shareClass: ShareClass) => {
+      return sum + shareClass.preMoneyShares;
+    }, 0);
   }
 
   buildPreMoneyShareClass(name: string, numberOfShares: number): ShareClass {
@@ -112,7 +109,7 @@ class CapTable implements CapTableInterface {
       preMoneyShares: numberOfShares,
       preMoneyPercentOwnership: 0,
       preMoneyOwnershipValue: 0,
-      postMoneyShares: 0,
+      postMoneyShares: numberOfShares,
       postMoneyNewOwnership: 0,
       postMoneyPercentChange: 0,
       postMoneyOwnershipValue: 0,
@@ -137,4 +134,4 @@ class CapTable implements CapTableInterface {
   }
 }
 
-export { CapTable };
+export { CapTable, ShareClass };
