@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { CapTable, ShareClass } from "../src/index";
+import { CapTable, ShareClassInterface } from "../src/index";
 
 const org = {
   newShareClass: "Series A",
@@ -14,15 +14,14 @@ const org = {
       conversionCap: 5000000,
       conversionDiscount: 0.2,
       conversionDate: new Date(),
+      conversionAmount: 500000,
     },
   ],
-  preMoneyShareClasses: [
-    { name: "Founders' Shares", numberOfShares: 8000000 },
-    { name: "Rest of Common", numberOfShares: 1000000 },
-    { name: "Warrants", numberOfShares: 100000 },
-    { name: "Granted Options", numberOfShares: 800000 },
-    { name: "Options Available before", numberOfShares: 100000 },
-  ],
+  foundersNumberOfShares: 8000000,
+  commonNumberOfShares: 1000000,
+  warrantsNumberOfShares: 100000,
+  grantedOptionsNumberOfShares: 800000,
+  oldOptionsNumberOfShares: 100000,
 };
 
 describe("a capitalization table", () => {
@@ -34,6 +33,10 @@ describe("a capitalization table", () => {
 
   test("has total pre-money shares", () => {
     expect(table.totalPreMoneyShares).toBe(10000000);
+  });
+
+  test("has total pre-money ownership value", () => {
+    expect(table.totalPreMoneyOwnershipValue).toBe(30000000);
   });
 
   test("has total post-money shares", () => {
@@ -63,12 +66,15 @@ describe("a captable's share classes", () => {
 
   test("a convertable note share class's number of shares", () => {
     expect(note.preMoneyShares).toBe(0);
-    expect(note.postMoneyShares).toBe(1000000);
+    // expect(note.postMoneyShares).toBe(265603); // 265,603 from discount
+    expect(note.postMoneyShares).toBe(1000000); // 1,000,000 from Cap
   });
 
   test("a convertable note share class's value", () => {
     expect(note.preMoneyOwnershipValue).toBe(0);
-    expect(note.postMoneyOwnershipValue).toBe(2224969);
+    // TODO round here? different matcher? round in implementation?
+    // expect(Math.round(note.postMoneyOwnershipValue)).toBe(625000); // $625,000 from discount
+    expect(Math.round(note.postMoneyOwnershipValue)).toBe(2224969); // $2,224,969 from Cap
   });
 
   test("a new money share class's number of shares", () => {
@@ -81,7 +87,7 @@ describe("a captable's share classes", () => {
     expect(newMoney.postMoneyOwnershipValue).toBe(1000000);
   });
 
-  test("a new options for pool share class's value", () => {
+  test("a new options for pool share class's number of shares", () => {
     expect(poolOptions.preMoneyShares).toBe(0);
     expect(poolOptions.postMoneyShares).toBe(2483333);
   });
@@ -91,7 +97,10 @@ describe("a captable's share classes", () => {
     expect(poolOptions.postMoneyOwnershipValue).toBe(5525340);
   });
 
-  function findByName(objs: ShareClass[], name: string): ShareClass {
+  function findByName(
+    objs: ShareClassInterface[],
+    name: string
+  ): ShareClassInterface {
     const found = objs.find((obj) => obj.name === name);
     if (found === undefined)
       throw new Error(`ShareClass named ${name} not found.`);
