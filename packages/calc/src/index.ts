@@ -219,18 +219,24 @@ class CapTable implements CapTableInterface {
   }
 
   calcNewOptionsShareClassShares() {
-    const gExistingSharesBeforeFinancing = this.totalPreMoneyShares;
-    const gNewMoneyIn = this.organization.newMoneyRaised;
-    const gPreMoneyValuation = this.organization.preMoneyValuation;
-    const gOldPool = this.organization.oldOptionsNumberOfShares;
-    const gPostMoneyOptionPool = this.organization.postMoneyOptionPoolSize;
+    // Reference for spreadsheet formula
+    // const gExistingSharesBeforeFinancing = this.totalPreMoneyShares;
+    // const gNewMoneyIn = this.organization.newMoneyRaised;
+    // const gPreMoneyValuation = this.organization.preMoneyValuation;
+    // const gOldPool = this.organization.oldOptionsNumberOfShares;
+    // const gPostMoneyOptionPool = this.organization.postMoneyOptionPoolSize;
     const shares =
-      (gExistingSharesBeforeFinancing / (1 / gPostMoneyOptionPool - 1)) *
-        (1 + gNewMoneyIn / gPreMoneyValuation) -
-      gOldPool / 1 -
-      gPostMoneyOptionPool /
+      (this.totalPreMoneyShares /
+        (1 / this.organization.postMoneyOptionPoolSize - 1)) *
+        (1 +
+          this.organization.newMoneyRaised /
+            this.organization.preMoneyValuation) -
+      this.organization.oldOptionsNumberOfShares / 1 -
+      this.organization.postMoneyOptionPoolSize /
         (1 -
-          (gNewMoneyIn / gPreMoneyValuation) * (1 / gPostMoneyOptionPool - 1));
+          (this.organization.newMoneyRaised /
+            this.organization.preMoneyValuation) *
+            (1 / this.organization.postMoneyOptionPoolSize - 1));
     return Math.round(shares);
   }
 
