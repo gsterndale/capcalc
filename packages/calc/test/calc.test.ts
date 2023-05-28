@@ -46,59 +46,56 @@ describe("a capitalization table", () => {
   test("has total post-money ownership value", () => {
     expect(table.totalPostMoneyOwnershipValue).toBeCloseTo(30999999, 0); // Spreadsheet 31000000
   });
-});
 
-describe("a captable's share classes", () => {
-  const table = new CapTable(org);
-  const founders = findByName(table.shareClasses, "Founders' Shares");
-  const note = findByName(
-    table.shareClasses,
-    "Convertible Notes Into New Share Class"
-  );
-  const newMoney = findByName(table.shareClasses, "New Money Equity");
-  const poolOptions = findByName(table.shareClasses, "New Options for Pool");
-
-  test("a pre-money share class's number of shares", () => {
-    expect(founders.preMoneyShares).toBe(8000000);
-    expect(founders.postMoneyShares).toBe(8000000);
+  test("founder share class", () => {
+    const shareClass = findByName(table.shareClasses, "Founders' Shares");
+    expect(shareClass).toEqual(
+      expect.objectContaining({
+        preMoneyShares: 8000000,
+        postMoneyShares: 8000000,
+        preMoneyOwnershipValue: expect.closeTo(24000000),
+        postMoneyOwnershipValue: expect.closeTo(17799753, 0),
+      })
+    );
   });
 
-  test("a pre-money share class's value", () => {
-    expect(founders.preMoneyOwnershipValue).toBeCloseTo(24000000);
-    expect(founders.postMoneyOwnershipValue).toBeCloseTo(17799753, 0);
+  test("convertable note share class", () => {
+    const shareClass = findByName(
+      table.shareClasses,
+      "Convertible Notes Into New Share Class"
+    );
+    expect(shareClass).toEqual(
+      expect.objectContaining({
+        preMoneyShares: 0,
+        postMoneyShares: 1000000, // 1,000,000 from Cap, 265,603 from discount
+        preMoneyOwnershipValue: expect.closeTo(0),
+        postMoneyOwnershipValue: expect.closeTo(2224969, 0), // $2,224,969 from Cap, $625,000 from discount
+      })
+    );
   });
 
-  test("a convertable note share class's number of shares", () => {
-    expect(note.preMoneyShares).toBe(0);
-    // expect(note.postMoneyShares).toBe(265603); // 265,603 from discount
-    expect(note.postMoneyShares).toBe(1000000); // 1,000,000 from Cap
+  test("new money share class", () => {
+    const shareClass = findByName(table.shareClasses, "New Money Equity");
+    expect(shareClass).toEqual(
+      expect.objectContaining({
+        preMoneyShares: 0,
+        postMoneyShares: 449444,
+        preMoneyOwnershipValue: expect.closeTo(0),
+        postMoneyOwnershipValue: expect.closeTo(999999, 0), // Spreadsheet 1000000
+      })
+    );
   });
 
-  test("a convertable note share class's value", () => {
-    expect(note.preMoneyOwnershipValue).toBeCloseTo(0);
-    // TODO round here? different matcher? round in implementation?
-    expect(Math.round(note.postMoneyOwnershipValue)).toBeCloseTo(2224969); // $2,224,969 from Cap
-    // expect(Math.round(note.postMoneyOwnershipValue)).toBeCloseTo(625000); // $625,000 from discount
-  });
-
-  test("a new money share class's number of shares", () => {
-    expect(newMoney.preMoneyShares).toBe(0);
-    expect(newMoney.postMoneyShares).toBe(449444);
-  });
-
-  test("a new money share class's value", () => {
-    expect(newMoney.preMoneyOwnershipValue).toBeCloseTo(0);
-    expect(newMoney.postMoneyOwnershipValue).toBeCloseTo(999999, 0); // Spreadsheet 1000000
-  });
-
-  test("a new options for pool share class's number of shares", () => {
-    expect(poolOptions.preMoneyShares).toBe(0);
-    expect(poolOptions.postMoneyShares).toBe(2483333);
-  });
-
-  test("a new options for pool share class's value", () => {
-    expect(poolOptions.preMoneyOwnershipValue).toBeCloseTo(0);
-    expect(poolOptions.postMoneyOwnershipValue).toBeCloseTo(5525339, 0); // Spreadsheet 5525340
+  test("new options for pool share class", () => {
+    const shareClass = findByName(table.shareClasses, "New Options for Pool");
+    expect(shareClass).toEqual(
+      expect.objectContaining({
+        preMoneyShares: 0,
+        postMoneyShares: 2483333,
+        preMoneyOwnershipValue: expect.closeTo(0),
+        postMoneyOwnershipValue: expect.closeTo(5525339, 0), // Spreadsheet 5525340
+      })
+    );
   });
 
   function findByName(
