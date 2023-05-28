@@ -36,6 +36,16 @@ interface CapTableInterface {
   readonly totalPostMoneyDilution: number;
 }
 
+interface BuildShareClassParameters {
+  name: string;
+  preMoneyShares: number;
+  postMoneyShares: number;
+  preMoneySharePrice: number;
+  postMoneySharePrice: number;
+  totalPreMoneyShares: number;
+  totalPostMoneyShares: number;
+}
+
 class CapTable implements CapTableInterface {
   // TODO why do we have to redefine these properties if they're defined in the CapTable interface already?
   shareClasses!: ShareClassInterface[];
@@ -97,54 +107,76 @@ class CapTable implements CapTableInterface {
     this.postMoneySharePrice =
       this.organization.preMoneyValuation / this.totalSharesBeforeFinancing;
 
-    const foundersShareClass = this.buildShareClass(
-      "Founders' Shares",
-      this.organization.foundersNumberOfShares,
-      this.organization.foundersNumberOfShares
-    );
-
-    const commonShareClass = this.buildShareClass(
-      "Rest of Common",
-      this.organization.commonNumberOfShares,
-      this.organization.commonNumberOfShares
-    );
-    const warrantsShareClass = this.buildShareClass(
-      "Warrants",
-      this.organization.warrantsNumberOfShares,
-      this.organization.warrantsNumberOfShares
-    );
-    const grantedOptionsShareClass = this.buildShareClass(
-      "Granted Options",
-      this.organization.grantedOptionsNumberOfShares,
-      this.organization.grantedOptionsNumberOfShares
-    );
-    const oldOptionsShareClass = this.buildShareClass(
-      "Options Available before",
-      this.organization.oldOptionsNumberOfShares,
-      this.organization.oldOptionsNumberOfShares
-    );
-
-    const newOptionsShareClass = this.buildShareClass(
-      "New Options for Pool",
-      0,
-      newOptionsShareClassShares
-    );
-
-    const notesShareClass = this.buildShareClass(
-      "Convertible Notes Into New Share Class",
-      0,
-      notesShareClassPostMoneyShares
-    );
-
     const newMoneyShareClassPostMoneyShares = Math.round(
       this.organization.newMoneyRaised / this.postMoneySharePrice
     );
 
-    const newMoneyShareClass = this.buildShareClass(
-      "New Money Equity",
-      0,
-      newMoneyShareClassPostMoneyShares
-    );
+    this.totalPostMoneyShares = [
+      this.calcTotalPreMoneyShares(),
+      newOptionsShareClassShares,
+      notesShareClassPostMoneyShares,
+      newMoneyShareClassPostMoneyShares,
+    ].reduce((memo, a) => memo + a, 0);
+
+    const aggregates = {
+      preMoneySharePrice: this.preMoneySharePrice,
+      postMoneySharePrice: this.postMoneySharePrice,
+      totalPreMoneyShares: this.totalPreMoneyShares,
+      totalPostMoneyShares: this.totalPostMoneyShares,
+    };
+
+    const foundersShareClass = this.buildShareClass({
+      name: "Founders' Shares",
+      preMoneyShares: this.organization.foundersNumberOfShares,
+      postMoneyShares: this.organization.foundersNumberOfShares,
+      ...aggregates,
+    });
+
+    const commonShareClass = this.buildShareClass({
+      name: "Rest of Common",
+      preMoneyShares: this.organization.commonNumberOfShares,
+      postMoneyShares: this.organization.commonNumberOfShares,
+      ...aggregates,
+    });
+    const warrantsShareClass = this.buildShareClass({
+      name: "Warrants",
+      preMoneyShares: this.organization.warrantsNumberOfShares,
+      postMoneyShares: this.organization.warrantsNumberOfShares,
+      ...aggregates,
+    });
+    const grantedOptionsShareClass = this.buildShareClass({
+      name: "Granted Options",
+      preMoneyShares: this.organization.grantedOptionsNumberOfShares,
+      postMoneyShares: this.organization.grantedOptionsNumberOfShares,
+      ...aggregates,
+    });
+    const oldOptionsShareClass = this.buildShareClass({
+      name: "Options Available before",
+      preMoneyShares: this.organization.oldOptionsNumberOfShares,
+      postMoneyShares: this.organization.oldOptionsNumberOfShares,
+      ...aggregates,
+    });
+
+    const newOptionsShareClass = this.buildShareClass({
+      name: "New Options for Pool",
+      preMoneyShares: 0,
+      postMoneyShares: newOptionsShareClassShares,
+      ...aggregates,
+    });
+
+    const notesShareClass = this.buildShareClass({
+      name: "Convertible Notes Into New Share Class",
+      preMoneyShares: 0,
+      postMoneyShares: notesShareClassPostMoneyShares,
+      ...aggregates,
+    });
+
+    const newMoneyShareClass = this.buildShareClass({
+      name: "New Money Equity",
+      preMoneyShares: 0,
+      postMoneyShares: newMoneyShareClassPostMoneyShares,
+      ...aggregates,
+    });
 
     const preMoneyShareClasses = [
       foundersShareClass,
@@ -161,10 +193,6 @@ class CapTable implements CapTableInterface {
       newMoneyShareClass
     );
 
-    this.totalPostMoneyShares = this.shareClasses.reduce(
-      (sum, sc) => sum + sc.postMoneyShares,
-      0
-    );
     this.totalPostMoneyOwnershipValue = this.shareClasses.reduce(
       (sum, sc) => sum + sc.postMoneyOwnershipValue,
       0
@@ -189,16 +217,21 @@ class CapTable implements CapTableInterface {
     );
   }
 
-  buildShareClass(
-    name: string,
-    preMoneyShares: number,
-    postMoneyShares: number
-  ): ShareClassInterface {
-    const preMoneyPercentOwnership = preMoneyShares / this.totalPreMoneyShares;
-    const preMoneyOwnershipValue = this.preMoneySharePrice * preMoneyShares;
-    const postMoneyPercentOwnership =
-      postMoneyShares / this.totalPostMoneyShares;
-    const postMoneyOwnershipValue = this.postMoneySharePrice * postMoneyShares;
+  buildShareClass({
+    name,
+    preMoneyShares,
+    postMoneyShares,
+    preMoneySharePrice,
+    postMoneySharePrice,
+    totalPreMoneyShares,
+    totalPostMoneyShares,
+  }: BuildShareClassParameters): ShareClassInterface {
+    if (isNaN(totalPostMoneyShares) || totalPostMoneyShares <= 0)
+      throw new Error(`totalPostMoneyShares is ${totalPostMoneyShares}`);
+    const preMoneyPercentOwnership = preMoneyShares / totalPreMoneyShares;
+    const preMoneyOwnershipValue = preMoneySharePrice * preMoneyShares;
+    const postMoneyPercentOwnership = postMoneyShares / totalPostMoneyShares;
+    const postMoneyOwnershipValue = postMoneySharePrice * postMoneyShares;
     const postMoneyPercentChange =
       postMoneyPercentOwnership - preMoneyPercentOwnership;
     const postMoneyValueChange =

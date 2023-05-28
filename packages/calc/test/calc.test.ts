@@ -52,9 +52,14 @@ describe("a capitalization table", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 8000000,
-        postMoneyShares: 8000000,
+        preMoneyPercentOwnership: expect.closeTo(0.8),
         preMoneyOwnershipValue: expect.closeTo(24000000),
+        postMoneyShares: 8000000,
         postMoneyOwnershipValue: expect.closeTo(17799753, 0),
+        postMoneyDilution: expect.closeTo(-0.282),
+        postMoneyPercentChange: expect.closeTo(-0.226),
+        postMoneyPercentOwnership: expect.closeTo(0.574),
+        postMoneyValueChange: expect.closeTo(-6200247, 0), // Spreadsheet -6200246
       })
     );
   });
@@ -67,9 +72,14 @@ describe("a capitalization table", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 1000000, // 1,000,000 from Cap, 265,603 from discount
+        preMoneyPercentOwnership: expect.closeTo(0),
         preMoneyOwnershipValue: expect.closeTo(0),
+        postMoneyShares: 1000000, // 1,000,000 from Cap, 265,603 from discount
         postMoneyOwnershipValue: expect.closeTo(2224969, 0), // $2,224,969 from Cap, $625,000 from discount
+        postMoneyDilution: Infinity,
+        postMoneyPercentChange: expect.closeTo(0.072),
+        postMoneyPercentOwnership: expect.closeTo(0.072),
+        postMoneyValueChange: expect.closeTo(2224969, 0),
       })
     );
   });
@@ -79,9 +89,14 @@ describe("a capitalization table", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 449444,
+        preMoneyPercentOwnership: expect.closeTo(0),
         preMoneyOwnershipValue: expect.closeTo(0),
+        postMoneyShares: 449444,
         postMoneyOwnershipValue: expect.closeTo(999999, 0), // Spreadsheet 1000000
+        postMoneyDilution: Infinity,
+        postMoneyPercentChange: expect.closeTo(0.032),
+        postMoneyPercentOwnership: expect.closeTo(0.032),
+        postMoneyValueChange: expect.closeTo(999999, 0),
       })
     );
   });
@@ -91,9 +106,14 @@ describe("a capitalization table", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 2483333,
+        preMoneyPercentOwnership: expect.closeTo(0),
         preMoneyOwnershipValue: expect.closeTo(0),
+        postMoneyShares: 2483333,
         postMoneyOwnershipValue: expect.closeTo(5525339, 0), // Spreadsheet 5525340
+        postMoneyDilution: Infinity,
+        postMoneyPercentChange: expect.closeTo(0.178),
+        postMoneyPercentOwnership: expect.closeTo(0.178),
+        postMoneyValueChange: expect.closeTo(5525339, 0),
       })
     );
   });
