@@ -42,6 +42,10 @@ describe("a capitalization table", () => {
   test("has total post-money shares", () => {
     expect(table.totalPostMoneyShares).toBe(13932777); // Spreadsheet value 13932778
   });
+
+  test("has total post-money ownership value", () => {
+    expect(table.totalPostMoneyOwnershipValue).toBeCloseTo(30999999, 0); // Spreadsheet 31000000
+  });
 });
 
 describe("a captable's share classes", () => {
