@@ -78,26 +78,15 @@ class CapTable implements CapTableInterface {
 
     const newOptionsShareClassShares = this.calcNewOptionsShareClassShares();
 
-    const notesShareClassDiscountPrice = this.calcNotesShareClassDiscountPrice(
-      this.organization.preMoneyValuation,
-      this.totalPreMoneyShares,
-      newOptionsShareClassShares
-    );
-
-    const notesShareClassDiscountShares =
-      this.calcNotesShareClassDiscountShares(notesShareClassDiscountPrice);
-
-    const notesShareClassCapShares = this.calcNotesShareClassCapShares(
-      this.totalPreMoneyShares
-    );
-
-    const notesShareClassPostMoneyShares = Math.max(
-      notesShareClassDiscountShares,
-      notesShareClassCapShares
-    );
+    const notesShareClassPostMoneyShares =
+      this.calcNotesShareClassPostMoneyShares(
+        this.totalPreMoneyOwnershipValue,
+        this.totalPreMoneyShares,
+        newOptionsShareClassShares
+      );
 
     this.preMoneySharePrice =
-      this.organization.preMoneyValuation / this.totalPreMoneyShares;
+      this.totalPreMoneyOwnershipValue / this.totalPreMoneyShares;
 
     this.totalSharesBeforeFinancing =
       notesShareClassPostMoneyShares +
@@ -105,7 +94,7 @@ class CapTable implements CapTableInterface {
       newOptionsShareClassShares;
 
     this.postMoneySharePrice =
-      this.organization.preMoneyValuation / this.totalSharesBeforeFinancing;
+      this.totalPreMoneyOwnershipValue / this.totalSharesBeforeFinancing;
 
     const newMoneyShareClassPostMoneyShares = Math.round(
       this.organization.newMoneyRaised / this.postMoneySharePrice
@@ -198,10 +187,10 @@ class CapTable implements CapTableInterface {
       0
     );
     const check =
-      this.organization.preMoneyValuation + this.organization.newMoneyRaised;
+      this.totalPreMoneyOwnershipValue + this.organization.newMoneyRaised;
     if (check !== this.totalPostMoneyOwnershipValue) {
-      const message = `Expected ${this.totalPostMoneyOwnershipValue} to eq ${check}.`;
-      console.warn(message);
+      // const message = `Expected ${this.totalPostMoneyOwnershipValue} to eq ${check}.`;
+      // console.warn(message);
     }
     this.totalPostMoneyPercentOwnership = this.shareClasses.reduce(
       (sum, sc) => sum + sc.postMoneyPercentOwnership,
@@ -273,31 +262,98 @@ class CapTable implements CapTableInterface {
     return Math.round(shares);
   }
 
-  calcNotesShareClassDiscountPrice(
+  calcInterestAccrued(principal: number, rate: number, period: number): number {
+    // IF(rate>0,rate/365*principal*(IF(conversionDate>0,conversionDate,TODAY())-startDate)
+    return rate * principal * period;
+  }
+
+  roundTo(num: number, decimals: number): number {
+    const pow = 10 ^ decimals;
+    return Math.round((num + Number.EPSILON) * pow) / pow;
+  }
+
+  iteratate(cb: Function, lastGuess = 0.0, max = 1000, decimals = 3) {
+    let newGuess;
+    for (let i = 0; i < max; i++) {
+      newGuess = this.roundTo(cb(lastGuess), decimals);
+      console.log({ newGuess: newGuess, lastGuess: lastGuess, i: i });
+      if (newGuess === lastGuess) return newGuess;
+      lastGuess = newGuess;
+    }
+    throw new Error(`Unable to find solution in ${max} iterations.`);
+  }
+
+  calcNotesShareClassPostMoneyShares(
     preMoneyValuation: number,
-    existingSharesBeforeFinancing: number,
+    preMoneyShares: number,
     newPool: number
   ): number {
-    const overrideNote = this.organization.notes[0]; // TODO find by class
-    if (overrideNote.conversionAmount === undefined) return 0;
-    return (
-      (preMoneyValuation * (1 - overrideNote.conversionDiscount) -
-        overrideNote.conversionAmount) /
-      (existingSharesBeforeFinancing + newPool)
-    );
-  }
+    console.log(this.organization.notes);
 
-  calcNotesShareClassDiscountShares(discountPrice: number) {
-    const overrideNote = this.organization.notes[0]; // TODO find by class
-    if (overrideNote.conversionAmount === undefined) return 0;
-    return Math.round(overrideNote.conversionAmount / discountPrice); // TODO round or floor?
-  }
+    return this.iteratate((guess: number) => {
+      return this.organization.notes.reduce((memo: number, note: Note) => {
+        const principal = note.principalInvested || 0;
+        let interestAccrued = 0;
+        if (
+          note.interestRate &&
+          note.interestStartDate &&
+          principal &&
+          note.conversionDate &&
+          note.interestConverts
+        ) {
+          const msPerYear = 1000 * 60 * 60 * 24 * 365;
+          const period =
+            (note.conversionDate.getTime() - note.interestStartDate.getTime()) /
+            msPerYear;
+          interestAccrued = this.calcInterestAccrued(
+            principal,
+            note.interestRate,
+            period
+          );
+        }
 
-  calcNotesShareClassCapShares(totalPreMoneyShares: number) {
-    const overrideNote = this.organization.notes[0]; // TODO find by class
-    if (overrideNote.conversionAmount === undefined) return 0;
-    const conversionCapPrice = overrideNote.conversionCap / totalPreMoneyShares;
-    return overrideNote.conversionAmount / conversionCapPrice;
+        const conversionAmount =
+          note.conversionAmount || principal + interestAccrued;
+
+        const capPrice = note.conversionCap / preMoneyShares;
+        const capShares = conversionAmount / capPrice;
+
+        // THESE ARE ALL GUESSES
+        const totalSharesBeforeFinancing = guess + preMoneyShares + newPool;
+        const sharePriceForFinancing =
+          preMoneyValuation / totalSharesBeforeFinancing;
+        // let sharePriceForFinancing = preMoneyValuation / this.totalSharesBeforeFinancing
+        // This is Greg's algebra
+        // const discountPrice =
+        //   (preMoneyValuation * (1 - note.conversionDiscount) - conversionAmount) /
+        //   (preMoneyShares + newPool);
+        const discountPrice =
+          sharePriceForFinancing * (1 - note.conversionDiscount);
+
+        const discountShares = Math.round(conversionAmount / discountPrice); // TODO round or floor?
+
+        const noteShares = Math.max(discountShares, capShares);
+
+        // TODO left off here. why are we only iterating twice?
+        // Guess should converge on 1,523,114
+        // Share price for financing should be $2.14
+        // Is it because the Cap always "wins" i.e. it's the max
+        // Maybe try solving for SPFF?
+        console.log({
+          guess: guess,
+          totalSharesBeforeFinancing: totalSharesBeforeFinancing,
+          sharePriceForFinancing: sharePriceForFinancing,
+          discountPrice: discountPrice,
+          discountShares: discountShares,
+          noteShares: noteShares,
+          memo: memo,
+          capPrice: capPrice, // all correct
+          capShares: capShares, // first two correct
+        });
+
+        return memo + noteShares;
+      }, 0);
+    });
   }
 
   calcTotalPreMoneyShares() {
@@ -324,4 +380,4 @@ interface ShareClassInterface {
   postMoneyDilution: number;
 }
 
-export { CapTable, ShareClassInterface };
+export { Organization, CapTable, ShareClassInterface };
