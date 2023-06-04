@@ -41,7 +41,7 @@ interface BuildShareClassParameters {
   preMoneyShares: number;
   postMoneyShares: number;
   preMoneySharePrice: number;
-  postMoneySharePrice: number;
+  sharePriceForFinancing: number;
   totalPreMoneyShares: number;
   totalPostMoneyShares: number;
 }
@@ -60,7 +60,7 @@ class CapTable implements CapTableInterface {
   organization: Organization;
 
   preMoneySharePrice!: number;
-  postMoneySharePrice!: number;
+  sharePriceForFinancing!: number;
   totalSharesBeforeFinancing!: number;
 
   constructor(org: Organization) {
@@ -70,38 +70,49 @@ class CapTable implements CapTableInterface {
 
   calculate() {
     // order matters
-    // TODO consider whether calc functions will use this object's state (e.g. this.organization), or should be passed all values.
+    // TODO consider whether calc functions will use this object's state (e.g. this.organization), or should be passed _all_ values.
     this.shareClasses = [];
 
     this.totalPreMoneyShares = this.calcTotalPreMoneyShares();
     this.totalPreMoneyOwnershipValue = this.organization.preMoneyValuation;
 
-    const newOptionsShareClassShares = this.calcNewOptionsShareClassShares();
+    this.preMoneySharePrice = this.roundTo(
+      this.totalPreMoneyOwnershipValue / this.totalPreMoneyShares,
+      5
+    );
+
+    this.totalPostMoneyOwnershipValue =
+      this.organization.preMoneyValuation + this.organization.newMoneyRaised;
+
+    this.sharePriceForFinancing = this.calcSharePriceForFinancing(
+      this.totalPreMoneyShares,
+      this.totalPostMoneyOwnershipValue,
+      this.preMoneySharePrice
+    );
+
+    const newOptionsShareClassShares = this.calcNewOptionsShareClassShares(
+      this.totalPostMoneyOwnershipValue,
+      this.sharePriceForFinancing
+    );
 
     const notesShareClassPostMoneyShares =
       this.calcNotesShareClassPostMoneyShares(
-        this.totalPreMoneyOwnershipValue,
         this.totalPreMoneyShares,
-        newOptionsShareClassShares
+        this.sharePriceForFinancing
       );
-
-    this.preMoneySharePrice =
-      this.totalPreMoneyOwnershipValue / this.totalPreMoneyShares;
 
     this.totalSharesBeforeFinancing =
       notesShareClassPostMoneyShares +
       this.totalPreMoneyShares +
       newOptionsShareClassShares;
 
-    this.postMoneySharePrice =
-      this.totalPreMoneyOwnershipValue / this.totalSharesBeforeFinancing;
-
-    const newMoneyShareClassPostMoneyShares = Math.round(
-      this.organization.newMoneyRaised / this.postMoneySharePrice
+    const newMoneyShareClassPostMoneyShares = this.roundTo(
+      this.organization.newMoneyRaised / this.sharePriceForFinancing,
+      0
     );
 
     this.totalPostMoneyShares = [
-      this.calcTotalPreMoneyShares(),
+      this.totalPreMoneyShares,
       newOptionsShareClassShares,
       notesShareClassPostMoneyShares,
       newMoneyShareClassPostMoneyShares,
@@ -109,7 +120,7 @@ class CapTable implements CapTableInterface {
 
     const aggregates = {
       preMoneySharePrice: this.preMoneySharePrice,
-      postMoneySharePrice: this.postMoneySharePrice,
+      sharePriceForFinancing: this.sharePriceForFinancing,
       totalPreMoneyShares: this.totalPreMoneyShares,
       totalPostMoneyShares: this.totalPostMoneyShares,
     };
@@ -186,12 +197,6 @@ class CapTable implements CapTableInterface {
       (sum, sc) => sum + sc.postMoneyOwnershipValue,
       0
     );
-    const check =
-      this.totalPreMoneyOwnershipValue + this.organization.newMoneyRaised;
-    if (check !== this.totalPostMoneyOwnershipValue) {
-      // const message = `Expected ${this.totalPostMoneyOwnershipValue} to eq ${check}.`;
-      // console.warn(message);
-    }
     this.totalPostMoneyPercentOwnership = this.shareClasses.reduce(
       (sum, sc) => sum + sc.postMoneyPercentOwnership,
       0
@@ -206,12 +211,22 @@ class CapTable implements CapTableInterface {
     );
   }
 
+  iteratate(cb: Function, lastGuess = 0.0, max = 1000, decimals = 3) {
+    let newGuess;
+    for (let i = 0; i < max; i++) {
+      newGuess = this.roundTo(cb(lastGuess), decimals);
+      if (newGuess === lastGuess) return newGuess;
+      lastGuess = newGuess;
+    }
+    throw new Error(`Unable to find solution in ${max} iterations.`);
+  }
+
   buildShareClass({
     name,
     preMoneyShares,
     postMoneyShares,
     preMoneySharePrice,
-    postMoneySharePrice,
+    sharePriceForFinancing,
     totalPreMoneyShares,
     totalPostMoneyShares,
   }: BuildShareClassParameters): ShareClassInterface {
@@ -220,7 +235,7 @@ class CapTable implements CapTableInterface {
     const preMoneyPercentOwnership = preMoneyShares / totalPreMoneyShares;
     const preMoneyOwnershipValue = preMoneySharePrice * preMoneyShares;
     const postMoneyPercentOwnership = postMoneyShares / totalPostMoneyShares;
-    const postMoneyOwnershipValue = postMoneySharePrice * postMoneyShares;
+    const postMoneyOwnershipValue = sharePriceForFinancing * postMoneyShares;
     const postMoneyPercentChange =
       postMoneyPercentOwnership - preMoneyPercentOwnership;
     const postMoneyValueChange =
@@ -240,7 +255,19 @@ class CapTable implements CapTableInterface {
     };
   }
 
-  calcNewOptionsShareClassShares() {
+  calcNewOptionsShareClassShares(
+    totalPostMoneyOwnershipValue: number,
+    sharePriceForFinancing: number
+  ): number {
+    return this.roundTo(
+      (this.organization.postMoneyOptionPoolSize *
+        totalPostMoneyOwnershipValue) /
+        sharePriceForFinancing,
+      0
+    );
+  }
+
+  OLDcalcNewOptionsShareClassShares() {
     // Reference for spreadsheet formula
     // const gExistingSharesBeforeFinancing = this.totalPreMoneyShares;
     // const gNewMoneyIn = this.organization.newMoneyRaised;
@@ -259,101 +286,152 @@ class CapTable implements CapTableInterface {
           (this.organization.newMoneyRaised /
             this.organization.preMoneyValuation) *
             (1 / this.organization.postMoneyOptionPoolSize - 1));
-    return Math.round(shares);
+    return this.roundTo(shares, 0);
+  }
+
+  // Greg's algebra
+  OLDcalcSharePriceForFinancing(
+    preMoneyValuation: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ): number {
+    const totalAdjustedConversionAmount = this.organization.notes.reduce(
+      (memo: number, note: Note) => {
+        const conversionAmount = this.calcNoteConversionAmount(note);
+        const adjustedConversionAmount =
+          conversionAmount / (1 - note.conversionDiscount);
+        return memo + adjustedConversionAmount;
+      },
+      0
+    );
+    const sharePriceForFinancing =
+      (preMoneyValuation - totalAdjustedConversionAmount) /
+      (preMoneyShares + newOptionsShareClassShares);
+    return this.roundTo(sharePriceForFinancing, 2);
+  }
+
+  calcNotesShareClassValue(
+    sharePriceForFinancing: number,
+    preMoneyShares: number
+  ): number {
+    return this.organization.notes.reduce((memo: number, note: Note) => {
+      const conversionAmount = this.calcNoteConversionAmount(note);
+      const capValue =
+        (conversionAmount * sharePriceForFinancing) /
+        (note.conversionCap / preMoneyShares);
+      const discountValue = conversionAmount / (1 - note.conversionDiscount);
+      const maxValue = Math.max(capValue, discountValue);
+      /*
+      console.log({
+        note: note,
+        sharePriceForFinancing: sharePriceForFinancing,
+        preMoneyShares: preMoneyShares,
+        conversionAmount: conversionAmount,
+        discountValue: discountValue,
+        capValue: capValue,
+      });
+      */
+      return this.roundTo(memo + maxValue, 2);
+    }, 0);
+  }
+
+  calcSharePriceForFinancing(
+    totalPreMoneyShares: number,
+    totalPostMoneyOwnershipValue: number,
+    preMoneySharePrice: number
+  ): number {
+    let spff: number = this.iteratate(
+      (guess: number): number => {
+        const notesShareClassValue = this.calcNotesShareClassValue(
+          guess,
+          totalPreMoneyShares
+        );
+        return (
+          (totalPostMoneyOwnershipValue *
+            (1 - this.organization.postMoneyOptionPoolSize) -
+            this.organization.newMoneyRaised -
+            notesShareClassValue) /
+          totalPreMoneyShares
+        );
+      },
+      preMoneySharePrice, // starting guess
+      1000, // iterations
+      5 // decimals
+    );
+    return this.roundTo(spff, 5);
+  }
+
+  calcNoteConversionAmount(note: Note): number {
+    if (note.conversionAmount !== undefined) return note.conversionAmount;
+    const principal = note.principalInvested || 0;
+    let interestAccrued = 0;
+    if (
+      note.interestRate &&
+      note.interestStartDate &&
+      principal &&
+      note.conversionDate &&
+      note.interestConverts
+    ) {
+      const periodInMS =
+        note.conversionDate.getTime() - note.interestStartDate.getTime();
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const periodInDays = Math.round(periodInMS / msPerDay);
+      const daysPerYear = 365;
+      const period = this.roundTo(periodInDays / daysPerYear, 2); // calculating to the nearest hundreth
+      interestAccrued = this.calcInterestAccrued(
+        principal,
+        note.interestRate,
+        period
+      );
+    }
+
+    return principal + interestAccrued;
   }
 
   calcInterestAccrued(principal: number, rate: number, period: number): number {
-    // IF(rate>0,rate/365*principal*(IF(conversionDate>0,conversionDate,TODAY())-startDate)
-    return rate * principal * period;
+    return this.roundTo(rate * principal * period, 2);
   }
 
   roundTo(num: number, decimals: number): number {
-    const pow = 10 ^ decimals;
+    if (decimals === 0) return Math.round(num);
+    const pow = Math.pow(10, decimals);
     return Math.round((num + Number.EPSILON) * pow) / pow;
   }
 
-  iteratate(cb: Function, lastGuess = 0.0, max = 1000, decimals = 3) {
-    let newGuess;
-    for (let i = 0; i < max; i++) {
-      newGuess = this.roundTo(cb(lastGuess), decimals);
-      console.log({ newGuess: newGuess, lastGuess: lastGuess, i: i });
-      if (newGuess === lastGuess) return newGuess;
-      lastGuess = newGuess;
-    }
-    throw new Error(`Unable to find solution in ${max} iterations.`);
-  }
-
   calcNotesShareClassPostMoneyShares(
-    preMoneyValuation: number,
     preMoneyShares: number,
-    newPool: number
+    sharePriceForFinancing: number
   ): number {
-    console.log(this.organization.notes);
+    return this.organization.notes.reduce((memo: number, note: Note) => {
+      const conversionAmount = this.calcNoteConversionAmount(note);
+      const capPrice = this.roundTo(note.conversionCap / preMoneyShares, 2);
+      const capShares = this.roundTo(conversionAmount / capPrice, 0);
 
-    return this.iteratate((guess: number) => {
-      return this.organization.notes.reduce((memo: number, note: Note) => {
-        const principal = note.principalInvested || 0;
-        let interestAccrued = 0;
-        if (
-          note.interestRate &&
-          note.interestStartDate &&
-          principal &&
-          note.conversionDate &&
-          note.interestConverts
-        ) {
-          const msPerYear = 1000 * 60 * 60 * 24 * 365;
-          const period =
-            (note.conversionDate.getTime() - note.interestStartDate.getTime()) /
-            msPerYear;
-          interestAccrued = this.calcInterestAccrued(
-            principal,
-            note.interestRate,
-            period
-          );
-        }
+      const discountPrice = this.roundTo(
+        sharePriceForFinancing * (1 - note.conversionDiscount),
+        2
+      );
 
-        const conversionAmount =
-          note.conversionAmount || principal + interestAccrued;
+      const discountShares = this.roundTo(conversionAmount / discountPrice, 0);
 
-        const capPrice = note.conversionCap / preMoneyShares;
-        const capShares = conversionAmount / capPrice;
+      const noteShares = Math.max(discountShares, capShares);
 
-        // THESE ARE ALL GUESSES
-        const totalSharesBeforeFinancing = guess + preMoneyShares + newPool;
-        const sharePriceForFinancing =
-          preMoneyValuation / totalSharesBeforeFinancing;
-        // let sharePriceForFinancing = preMoneyValuation / this.totalSharesBeforeFinancing
-        // This is Greg's algebra
-        // const discountPrice =
-        //   (preMoneyValuation * (1 - note.conversionDiscount) - conversionAmount) /
-        //   (preMoneyShares + newPool);
-        const discountPrice =
-          sharePriceForFinancing * (1 - note.conversionDiscount);
+      /*
+      console.log({
+        note: note,
+        conversionAmount: conversionAmount, // slightly off due to time math?
+        sharePriceForFinancing: sharePriceForFinancing, // correct based on Greg's algebra
+        preMoneyShares: preMoneyShares,
+        discountPrice: discountPrice, // all correct
+        discountShares: discountShares, // all correct
+        noteShares: noteShares, // all correct
+        capPrice: capPrice, // all correct
+        capShares: capShares, // all correct
+      });
+      */
 
-        const discountShares = Math.round(conversionAmount / discountPrice); // TODO round or floor?
-
-        const noteShares = Math.max(discountShares, capShares);
-
-        // TODO left off here. why are we only iterating twice?
-        // Guess should converge on 1,523,114
-        // Share price for financing should be $2.14
-        // Is it because the Cap always "wins" i.e. it's the max
-        // Maybe try solving for SPFF?
-        console.log({
-          guess: guess,
-          totalSharesBeforeFinancing: totalSharesBeforeFinancing,
-          sharePriceForFinancing: sharePriceForFinancing,
-          discountPrice: discountPrice,
-          discountShares: discountShares,
-          noteShares: noteShares,
-          memo: memo,
-          capPrice: capPrice, // all correct
-          capShares: capShares, // first two correct
-        });
-
-        return memo + noteShares;
-      }, 0);
-    });
+      return this.roundTo(memo + noteShares, 0);
+    }, 0);
   }
 
   calcTotalPreMoneyShares() {

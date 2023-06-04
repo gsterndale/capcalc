@@ -17,7 +17,6 @@ const org: Organization = {
   oldOptionsNumberOfShares: 100000,
 };
 
-/*
 describe("a capitalization table with one override convertible note", () => {
   org.notes = [
     {
@@ -41,12 +40,19 @@ describe("a capitalization table with one override convertible note", () => {
     expect(table.totalPreMoneyOwnershipValue).toBeCloseTo(30000000);
   });
 
+  test("share price for financing", () => {
+    expect(table.sharePriceForFinancing).toBeCloseTo(2.16364, 5);
+  });
+
   test("has total post-money shares", () => {
-    expect(table.totalPostMoneyShares).toBe(13932777); // Spreadsheet value 13932778
+    expect(table.totalPostMoneyShares).toBe(14327725);
   });
 
   test("has total post-money ownership value", () => {
-    expect(table.totalPostMoneyOwnershipValue).toBeCloseTo(30999999, 0); // Spreadsheet 31000000
+    const expected = org.preMoneyValuation + org.newMoneyRaised;
+    const actual = table.totalPostMoneyOwnershipValue;
+    const diff = Math.abs(expected - actual);
+    expect(diff / expected).toBeCloseTo(0.0);
   });
 
   test("founder share class", () => {
@@ -57,11 +63,11 @@ describe("a capitalization table with one override convertible note", () => {
         preMoneyPercentOwnership: expect.closeTo(0.8),
         preMoneyOwnershipValue: expect.closeTo(24000000),
         postMoneyShares: 8000000,
-        postMoneyOwnershipValue: expect.closeTo(17799753, 0),
-        postMoneyValueChange: expect.closeTo(-6200247, 0), // Spreadsheet -6200246
-        postMoneyPercentChange: expect.closeTo(-0.226),
-        postMoneyPercentOwnership: expect.closeTo(0.574),
-        postMoneyDilution: expect.closeTo(-0.282),
+        postMoneyOwnershipValue: expect.closeTo(17309120.0, 0),
+        postMoneyValueChange: expect.closeTo(-6690880.0, 0),
+        postMoneyPercentChange: expect.closeTo(-0.2416),
+        postMoneyPercentOwnership: expect.closeTo(0.5584),
+        postMoneyDilution: expect.closeTo(-0.3021),
       })
     );
   });
@@ -76,11 +82,11 @@ describe("a capitalization table with one override convertible note", () => {
         preMoneyShares: 0,
         preMoneyPercentOwnership: expect.closeTo(0),
         preMoneyOwnershipValue: expect.closeTo(0),
-        postMoneyShares: 1000000, // 1,000,000 from Cap, 265,603 from discount
-        postMoneyOwnershipValue: expect.closeTo(2224969, 0), // $2,224,969 from Cap, $625,000 from discount
-        postMoneyValueChange: expect.closeTo(2224969, 0),
-        postMoneyPercentChange: expect.closeTo(0.072),
-        postMoneyPercentOwnership: expect.closeTo(0.072),
+        postMoneyShares: 1000000,
+        postMoneyOwnershipValue: expect.closeTo(2163640.0, 0),
+        postMoneyValueChange: expect.closeTo(2163640.0, 0),
+        postMoneyPercentChange: expect.closeTo(0.0698),
+        postMoneyPercentOwnership: expect.closeTo(0.0698),
         postMoneyDilution: Infinity,
       })
     );
@@ -93,11 +99,11 @@ describe("a capitalization table with one override convertible note", () => {
         preMoneyShares: 0,
         preMoneyPercentOwnership: expect.closeTo(0),
         preMoneyOwnershipValue: expect.closeTo(0),
-        postMoneyShares: 449444,
-        postMoneyOwnershipValue: expect.closeTo(999999, 0), // Spreadsheet 1000000
-        postMoneyValueChange: expect.closeTo(999999, 0),
-        postMoneyPercentChange: expect.closeTo(0.032),
-        postMoneyPercentOwnership: expect.closeTo(0.032),
+        postMoneyShares: 462184,
+        postMoneyOwnershipValue: expect.closeTo(999999.79, 0),
+        postMoneyValueChange: expect.closeTo(999999.79, 0),
+        postMoneyPercentChange: expect.closeTo(0.0323),
+        postMoneyPercentOwnership: expect.closeTo(0.0323),
         postMoneyDilution: Infinity,
       })
     );
@@ -110,17 +116,16 @@ describe("a capitalization table with one override convertible note", () => {
         preMoneyShares: 0,
         preMoneyPercentOwnership: expect.closeTo(0),
         preMoneyOwnershipValue: expect.closeTo(0),
-        postMoneyShares: 2483333,
-        postMoneyOwnershipValue: expect.closeTo(5525339, 0), // Spreadsheet 5525340
-        postMoneyValueChange: expect.closeTo(5525339, 0),
-        postMoneyPercentChange: expect.closeTo(0.178),
-        postMoneyPercentOwnership: expect.closeTo(0.178),
+        postMoneyShares: 2865541,
+        postMoneyOwnershipValue: expect.closeTo(6200000.0, -1),
+        postMoneyValueChange: expect.closeTo(6200000.0, -1),
+        postMoneyPercentChange: expect.closeTo(0.2),
+        postMoneyPercentOwnership: expect.closeTo(0.2),
         postMoneyDilution: Infinity,
       })
     );
   });
 });
-*/
 
 describe("a capitalization table with a bunch of convertible notes", () => {
   org.notes = [
@@ -168,7 +173,34 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   ];
   const table = new CapTable(org);
 
-  test.only("convertable note share class", () => {
+  test("share price for financing", () => {
+    expect(table.sharePriceForFinancing).toBeCloseTo(2.06541, 5);
+  });
+
+  test("total post-money ownership value", () => {
+    const expected = org.preMoneyValuation + org.newMoneyRaised;
+    const actual = table.totalPostMoneyOwnershipValue;
+    const diff = Math.abs(expected - actual);
+    expect(diff / expected).toBeCloseTo(0.0);
+  });
+
+  test("New money share class post-money ownership value", () => {
+    const shareClass = findByName(table.shareClasses, "New Money Equity");
+    const expected = org.newMoneyRaised;
+    const actual = shareClass.postMoneyOwnershipValue;
+    const diff = Math.abs(expected - actual);
+    expect(diff).toBeLessThan(table.sharePriceForFinancing);
+  });
+
+  test("New options share class post-money ownership %", () => {
+    const shareClass = findByName(table.shareClasses, "New Options for Pool");
+    expect(shareClass.postMoneyPercentOwnership).toBeCloseTo(
+      org.postMoneyOptionPoolSize,
+      2
+    );
+  });
+
+  test("convertable note share class", () => {
     const shareClass = findByName(
       table.shareClasses,
       "Convertible Notes Into New Share Class"
@@ -176,13 +208,47 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        preMoneyPercentOwnership: expect.closeTo(0),
-        preMoneyOwnershipValue: expect.closeTo(0),
-        postMoneyShares: 1523114,
-        postMoneyOwnershipValue: expect.closeTo(3262314, 0),
-        postMoneyValueChange: expect.closeTo(3262314, 0),
-        postMoneyPercentChange: expect.closeTo(0.105),
-        postMoneyPercentOwnership: expect.closeTo(0.105),
+        preMoneyPercentOwnership: 0,
+        preMoneyOwnershipValue: 0,
+        postMoneyShares: 1523155,
+        postMoneyOwnershipValue: expect.closeTo(3145939.57, 0),
+        postMoneyValueChange: expect.closeTo(3145939.57, 0),
+        postMoneyPercentOwnership: expect.closeTo(0.1015),
+        postMoneyPercentChange: expect.closeTo(0.1015),
+        postMoneyDilution: Infinity,
+      })
+    );
+  });
+
+  test("new money equity share class", () => {
+    const shareClass = findByName(table.shareClasses, "New Money Equity");
+    expect(shareClass).toEqual(
+      expect.objectContaining({
+        preMoneyShares: 0,
+        preMoneyPercentOwnership: 0,
+        preMoneyOwnershipValue: 0,
+        postMoneyShares: 484165,
+        postMoneyOwnershipValue: expect.closeTo(999999.23, 0),
+        postMoneyValueChange: expect.closeTo(999999.23, 0),
+        postMoneyPercentOwnership: expect.closeTo(0.0323),
+        postMoneyPercentChange: expect.closeTo(0.0323),
+        postMoneyDilution: Infinity,
+      })
+    );
+  });
+
+  test("new options for pool share class", () => {
+    const shareClass = findByName(table.shareClasses, "New Options for Pool");
+    expect(shareClass).toEqual(
+      expect.objectContaining({
+        preMoneyShares: 0,
+        preMoneyPercentOwnership: 0,
+        preMoneyOwnershipValue: 0,
+        postMoneyShares: 3001825,
+        postMoneyOwnershipValue: expect.closeTo(6200000, -1),
+        postMoneyValueChange: expect.closeTo(6200000, -1),
+        postMoneyPercentOwnership: expect.closeTo(0.2),
+        postMoneyPercentChange: expect.closeTo(0.2),
         postMoneyDilution: Infinity,
       })
     );
