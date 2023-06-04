@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { Organization, CapTable, ShareClassInterface } from "../src/index";
+import { Organization, CapTable, ShareClass } from "../src/index";
 
 const org: Organization = {
   newShareClass: "Series A",
@@ -255,10 +255,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   });
 });
 
-function findByName(
-  objs: ShareClassInterface[],
-  name: string
-): ShareClassInterface {
+function findByName(objs: ShareClass[], name: string): ShareClass {
   const found = objs.find((obj) => obj.name === name);
   if (found === undefined)
     throw new Error(`ShareClass named ${name} not found.`);
