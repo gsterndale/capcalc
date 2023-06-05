@@ -8,6 +8,5 @@
     "composite": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src"],
-  "references": [{ "path": "../utils" }]
+  "include": ["src"]
 }

@@ -1,3 +1,4 @@
+import { iterate } from "@capcalc/utils";
 import Organization from "./Organization";
 import Note from "./Note";
 import ShareClass from "./ShareClass";
@@ -174,16 +175,6 @@ class CapTable {
     );
   }
 
-  iteratate(cb: Function, lastGuess = 0.0, max = 1000, decimals = 3) {
-    let newGuess;
-    for (let i = 0; i < max; i++) {
-      newGuess = this.roundTo(cb(lastGuess), decimals);
-      if (newGuess === lastGuess) return newGuess;
-      lastGuess = newGuess;
-    }
-    throw new Error(`Unable to find solution in ${max} iterations.`);
-  }
-
   buildShareClass({
     name,
     preMoneyShares,
@@ -250,7 +241,7 @@ class CapTable {
     totalPostMoneyOwnershipValue: number,
     preMoneySharePrice: number
   ): number {
-    let spff: number = this.iteratate(
+    let spff: number = iterate(
       (guess: number): number => {
         const notesShareClassValue = this.calcNotesShareClassValue(
           guess,

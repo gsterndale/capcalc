@@ -1,12 +1,12 @@
 {
-  "name": "capcalc",
+  "name": "@capcalc/monorepo",
   "version": "1.0.0",
   "scripts": {
     "test": "npm run test --workspaces --if-present"
   },
   "workspaces": [
     "web",
-    "packages/calc"
+    "packages/*"
   ],
   "devDependencies": {
     "typescript": "^5.0.4"
