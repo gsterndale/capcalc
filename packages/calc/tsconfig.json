@@ -1,13 +1,8 @@
 {
   "extends": "../../tsconfig.root.json",
   "compilerOptions": {
-    "lib": ["es2019"],
     "rootDir": "src",
-    "outDir": "dist",
-    "target": "es2022",
-    "composite": true,
-    "forceConsistentCasingInFileNames": true
+    "outDir": "dist"
   },
-  "include": ["src"],
-  "references": [{ "path": "../utils" }]
+  "include": ["src"]
 }
