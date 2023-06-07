@@ -1,4 +1,10 @@
-import { iterate, roundTo, simpleInterest } from "@capcalc/utils";
+import {
+  iterate,
+  asUSD,
+  asShares,
+  roundTo,
+  simpleInterest,
+} from "@capcalc/utils";
 import Organization from "./Organization";
 import Note from "./Note";
 import ShareClass from "./ShareClass";
@@ -70,9 +76,8 @@ class CapTable {
       this.totalPreMoneyShares +
       newOptionsShareClassShares;
 
-    const newMoneyShareClassPostMoneyShares = roundTo(
-      this.organization.newMoneyRaised / this.sharePriceForFinancing,
-      0
+    const newMoneyShareClassPostMoneyShares = asShares(
+      this.organization.newMoneyRaised / this.sharePriceForFinancing
     );
 
     this.totalPostMoneyShares = [
@@ -213,11 +218,10 @@ class CapTable {
     totalPostMoneyOwnershipValue: number,
     sharePriceForFinancing: number
   ): number {
-    return roundTo(
+    return asShares(
       (this.organization.postMoneyOptionPoolSize *
         totalPostMoneyOwnershipValue) /
-        sharePriceForFinancing,
-      0
+        sharePriceForFinancing
     );
   }
 
@@ -232,7 +236,7 @@ class CapTable {
         (note.conversionCap / preMoneyShares);
       const discountValue = conversionAmount / (1 - note.conversionDiscount);
       const maxValue = Math.max(capValue, discountValue);
-      return roundTo(memo + maxValue, 2);
+      return asUSD(memo + maxValue);
     }, 0);
   }
 
@@ -291,19 +295,18 @@ class CapTable {
   ): number {
     return this.organization.notes.reduce((memo: number, note: Note) => {
       const conversionAmount = this.calcNoteConversionAmount(note);
-      const capPrice = roundTo(note.conversionCap / preMoneyShares, 2);
-      const capShares = roundTo(conversionAmount / capPrice, 0);
+      const capPrice = asUSD(note.conversionCap / preMoneyShares);
+      const capShares = asShares(conversionAmount / capPrice);
 
-      const discountPrice = roundTo(
-        sharePriceForFinancing * (1 - note.conversionDiscount),
-        2
+      const discountPrice = asUSD(
+        sharePriceForFinancing * (1 - note.conversionDiscount)
       );
 
-      const discountShares = roundTo(conversionAmount / discountPrice, 0);
+      const discountShares = asShares(conversionAmount / discountPrice);
 
       const noteShares = Math.max(discountShares, capShares);
 
-      return roundTo(memo + noteShares, 0);
+      return asShares(memo + noteShares);
     }, 0);
   }
 

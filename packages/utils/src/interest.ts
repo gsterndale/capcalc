@@ -1,4 +1,4 @@
-import roundTo from "./roundTo";
+import { roundTo } from "./roundTo";
 
 function simpleInterest(
   principal: number,

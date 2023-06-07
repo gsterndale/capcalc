@@ -4,4 +4,13 @@ function roundTo(num: number, decimals: number): number {
   return Math.round((num + Number.EPSILON) * pow) / pow;
 }
 
-export default roundTo;
+function asUSD(num: number): number {
+  return roundTo(num, 2);
+}
+
+function asShares(num: number) {
+  // TODO determine if we should floor here
+  return roundTo(num, 0);
+}
+
+export { roundTo, asShares, asUSD };
