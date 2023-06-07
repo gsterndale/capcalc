@@ -1,4 +1,4 @@
-import { iterate, roundTo } from "@capcalc/utils";
+import { iterate, roundTo, simpleInterest } from "@capcalc/utils";
 import Organization from "./Organization";
 import Note from "./Note";
 import ShareClass from "./ShareClass";
@@ -279,18 +279,10 @@ class CapTable {
       const periodInDays = Math.round(periodInMS / msPerDay);
       const daysPerYear = 365;
       const period = roundTo(periodInDays / daysPerYear, 2); // calculating to the nearest hundreth
-      interestAccrued = this.calcInterestAccrued(
-        principal,
-        note.interestRate,
-        period
-      );
+      interestAccrued = simpleInterest(principal, note.interestRate, period);
     }
 
     return principal + interestAccrued;
-  }
-
-  calcInterestAccrued(principal: number, rate: number, period: number): number {
-    return roundTo(rate * principal * period, 2);
   }
 
   calcNotesShareClassPostMoneyShares(
