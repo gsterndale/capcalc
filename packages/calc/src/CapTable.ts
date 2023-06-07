@@ -1,4 +1,4 @@
-import { iterate } from "@capcalc/utils";
+import { iterate, roundTo } from "@capcalc/utils";
 import Organization from "./Organization";
 import Note from "./Note";
 import ShareClass from "./ShareClass";
@@ -40,7 +40,7 @@ class CapTable {
     this.totalPreMoneyShares = this.calcTotalPreMoneyShares();
     this.totalPreMoneyOwnershipValue = this.organization.preMoneyValuation;
 
-    this.preMoneySharePrice = this.roundTo(
+    this.preMoneySharePrice = roundTo(
       this.totalPreMoneyOwnershipValue / this.totalPreMoneyShares,
       5
     );
@@ -70,7 +70,7 @@ class CapTable {
       this.totalPreMoneyShares +
       newOptionsShareClassShares;
 
-    const newMoneyShareClassPostMoneyShares = this.roundTo(
+    const newMoneyShareClassPostMoneyShares = roundTo(
       this.organization.newMoneyRaised / this.sharePriceForFinancing,
       0
     );
@@ -213,7 +213,7 @@ class CapTable {
     totalPostMoneyOwnershipValue: number,
     sharePriceForFinancing: number
   ): number {
-    return this.roundTo(
+    return roundTo(
       (this.organization.postMoneyOptionPoolSize *
         totalPostMoneyOwnershipValue) /
         sharePriceForFinancing,
@@ -232,7 +232,7 @@ class CapTable {
         (note.conversionCap / preMoneyShares);
       const discountValue = conversionAmount / (1 - note.conversionDiscount);
       const maxValue = Math.max(capValue, discountValue);
-      return this.roundTo(memo + maxValue, 2);
+      return roundTo(memo + maxValue, 2);
     }, 0);
   }
 
@@ -259,7 +259,7 @@ class CapTable {
       1000, // iterations
       5 // decimals
     );
-    return this.roundTo(spff, 5);
+    return roundTo(spff, 5);
   }
 
   calcNoteConversionAmount(note: Note): number {
@@ -278,7 +278,7 @@ class CapTable {
       const msPerDay = 1000 * 60 * 60 * 24;
       const periodInDays = Math.round(periodInMS / msPerDay);
       const daysPerYear = 365;
-      const period = this.roundTo(periodInDays / daysPerYear, 2); // calculating to the nearest hundreth
+      const period = roundTo(periodInDays / daysPerYear, 2); // calculating to the nearest hundreth
       interestAccrued = this.calcInterestAccrued(
         principal,
         note.interestRate,
@@ -290,13 +290,7 @@ class CapTable {
   }
 
   calcInterestAccrued(principal: number, rate: number, period: number): number {
-    return this.roundTo(rate * principal * period, 2);
-  }
-
-  roundTo(num: number, decimals: number): number {
-    if (decimals === 0) return Math.round(num);
-    const pow = Math.pow(10, decimals);
-    return Math.round((num + Number.EPSILON) * pow) / pow;
+    return roundTo(rate * principal * period, 2);
   }
 
   calcNotesShareClassPostMoneyShares(
@@ -305,33 +299,19 @@ class CapTable {
   ): number {
     return this.organization.notes.reduce((memo: number, note: Note) => {
       const conversionAmount = this.calcNoteConversionAmount(note);
-      const capPrice = this.roundTo(note.conversionCap / preMoneyShares, 2);
-      const capShares = this.roundTo(conversionAmount / capPrice, 0);
+      const capPrice = roundTo(note.conversionCap / preMoneyShares, 2);
+      const capShares = roundTo(conversionAmount / capPrice, 0);
 
-      const discountPrice = this.roundTo(
+      const discountPrice = roundTo(
         sharePriceForFinancing * (1 - note.conversionDiscount),
         2
       );
 
-      const discountShares = this.roundTo(conversionAmount / discountPrice, 0);
+      const discountShares = roundTo(conversionAmount / discountPrice, 0);
 
       const noteShares = Math.max(discountShares, capShares);
 
-      /*
-      console.log({
-        note: note,
-        conversionAmount: conversionAmount, // slightly off due to time math?
-        sharePriceForFinancing: sharePriceForFinancing, // correct based on Greg's algebra
-        preMoneyShares: preMoneyShares,
-        discountPrice: discountPrice, // all correct
-        discountShares: discountShares, // all correct
-        noteShares: noteShares, // all correct
-        capPrice: capPrice, // all correct
-        capShares: capShares, // all correct
-      });
-      */
-
-      return this.roundTo(memo + noteShares, 0);
+      return roundTo(memo + noteShares, 0);
     }, 0);
   }
 
