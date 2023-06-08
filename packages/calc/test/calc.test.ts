@@ -1,5 +1,11 @@
 import { describe, expect, test } from "@jest/globals";
-import { Organization, CapTable, ShareClass } from "../src/index";
+import {
+  Organization,
+  CapTable,
+  ShareClass,
+  Note,
+  AbstractNoteFactory,
+} from "../src/index";
 
 const org: Organization = {
   newShareClass: "Series A",
@@ -19,12 +25,12 @@ const org: Organization = {
 
 describe("a capitalization table with one override convertible note", () => {
   org.notes = [
-    {
+    AbstractNoteFactory.create({
       conversionCap: 5000000,
       conversionDiscount: 0.2,
       conversionDate: new Date(),
-      conversionAmount: 500000,
-    },
+      principalInvested: 500000,
+    }),
   ];
   const table = new CapTable(org);
 
@@ -134,42 +140,38 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     // $200,000	1/3/15	6%	No	$5,500,000	10%	5/15/23
     // $200,000	11/10/20	6%	Yes	$8,000,000	10%	5/15/23
     // $200,000	1/3/15	6%	Yes	$10,000,000	20%	5/15/23
-    {
+    AbstractNoteFactory.create({
       principalInvested: 200000,
-      interestRate: 0.06,
+      interestRate: 0.0,
       interestStartDate: new Date(2015, 1, 15),
-      interestConverts: false,
       conversionCap: 3500000,
       conversionDiscount: 0.2,
       conversionDate: new Date(2023, 4, 15),
-    },
-    {
+    }),
+    AbstractNoteFactory.create({
       principalInvested: 200000,
-      interestRate: 0.06,
+      interestRate: 0.0,
       interestStartDate: new Date(2015, 0, 3),
-      interestConverts: false,
       conversionCap: 5500000,
       conversionDiscount: 0.1,
       conversionDate: new Date(2023, 4, 15),
-    },
-    {
+    }),
+    AbstractNoteFactory.create({
       principalInvested: 200000,
       interestRate: 0.06,
       interestStartDate: new Date(2020, 10, 10),
-      interestConverts: true,
       conversionCap: 8000000,
       conversionDiscount: 0.1,
       conversionDate: new Date(2023, 4, 15),
-    },
-    {
+    }),
+    AbstractNoteFactory.create({
       principalInvested: 200000,
       interestRate: 0.06,
       interestStartDate: new Date(2015, 0, 3),
-      interestConverts: true,
       conversionCap: 10000000,
       conversionDiscount: 0.2,
       conversionDate: new Date(2023, 4, 15),
-    },
+    }),
   ];
   const table = new CapTable(org);
 

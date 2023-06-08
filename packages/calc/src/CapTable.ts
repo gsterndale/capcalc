@@ -1,12 +1,6 @@
-import {
-  iterate,
-  asUSD,
-  asShares,
-  roundTo,
-  simpleInterest,
-} from "@capcalc/utils";
+import { iterate, asUSD, asShares, roundTo } from "@capcalc/utils";
 import Organization from "./Organization";
-import Note from "./Note";
+import { Note } from "./Note";
 import ShareClass from "./ShareClass";
 
 interface BuildShareClassParameters {
@@ -67,8 +61,8 @@ class CapTable {
 
     const notesShareClassPostMoneyShares =
       this.calcNotesShareClassPostMoneyShares(
-        this.totalPreMoneyShares,
-        this.sharePriceForFinancing
+        this.sharePriceForFinancing,
+        this.totalPreMoneyShares
       );
 
     this.totalSharesBeforeFinancing =
@@ -230,13 +224,7 @@ class CapTable {
     preMoneyShares: number
   ): number {
     return this.organization.notes.reduce((memo: number, note: Note) => {
-      const conversionAmount = this.calcNoteConversionAmount(note);
-      const capValue =
-        (conversionAmount * sharePriceForFinancing) /
-        (note.conversionCap / preMoneyShares);
-      const discountValue = conversionAmount / (1 - note.conversionDiscount);
-      const maxValue = Math.max(capValue, discountValue);
-      return asUSD(memo + maxValue);
+      return memo + note.value(sharePriceForFinancing, preMoneyShares);
     }, 0);
   }
 
@@ -266,47 +254,12 @@ class CapTable {
     return roundTo(spff, 5);
   }
 
-  calcNoteConversionAmount(note: Note): number {
-    if (note.conversionAmount !== undefined) return note.conversionAmount;
-    const principal = note.principalInvested || 0;
-    let interestAccrued = 0;
-    if (
-      note.interestRate &&
-      note.interestStartDate &&
-      principal &&
-      note.conversionDate &&
-      note.interestConverts
-    ) {
-      const periodInMS =
-        note.conversionDate.getTime() - note.interestStartDate.getTime();
-      const msPerDay = 1000 * 60 * 60 * 24;
-      const periodInDays = Math.round(periodInMS / msPerDay);
-      const daysPerYear = 365;
-      const period = roundTo(periodInDays / daysPerYear, 2); // calculating to the nearest hundreth
-      interestAccrued = simpleInterest(principal, note.interestRate, period);
-    }
-
-    return principal + interestAccrued;
-  }
-
   calcNotesShareClassPostMoneyShares(
-    preMoneyShares: number,
-    sharePriceForFinancing: number
+    sharePriceForFinancing: number,
+    preMoneyShares: number
   ): number {
     return this.organization.notes.reduce((memo: number, note: Note) => {
-      const conversionAmount = this.calcNoteConversionAmount(note);
-      const capPrice = asUSD(note.conversionCap / preMoneyShares);
-      const capShares = asShares(conversionAmount / capPrice);
-
-      const discountPrice = asUSD(
-        sharePriceForFinancing * (1 - note.conversionDiscount)
-      );
-
-      const discountShares = asShares(conversionAmount / discountPrice);
-
-      const noteShares = Math.max(discountShares, capShares);
-
-      return asShares(memo + noteShares);
+      return memo + note.shares(sharePriceForFinancing, preMoneyShares);
     }, 0);
   }
 
