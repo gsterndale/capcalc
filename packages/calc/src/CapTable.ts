@@ -3,147 +3,33 @@ import Organization from "./Organization";
 import { Note } from "./Note";
 import ShareClass from "./ShareClass";
 
-class CapTable {
-  shareClasses: ShareClass[];
+interface ICapTable {
+  readonly organization: Organization;
 
-  preMoneySharePrice: number;
-  sharePriceForFinancing: number;
+  shareClasses(): ShareClass[];
 
-  totalPreMoneyShares: number;
-  totalPreMoneyOwnershipValue: number;
-  totalPostMoneyShares: number;
-  totalPostMoneyPercentOwnership: number;
-  totalPostMoneyOwnershipValue: number;
-  totalPostMoneyValueChange: number;
-  totalPostMoneyDilution: number;
+  preMoneySharePrice(): number;
+  sharePriceForFinancing(): number;
+
+  totalPreMoneyShares(): number;
+  totalPreMoneyOwnershipValue(): number;
+  totalPostMoneyShares(): number;
+  totalPostMoneyPercentOwnership(): number;
+  totalPostMoneyOwnershipValue(): number;
+  totalPostMoneyValueChange(): number;
+  totalPostMoneyDilution(): number;
+}
+
+class CapTable implements ICapTable {
+  organization: Organization;
+
+  private spff: number | undefined; // used to cache result of expensive calculation
 
   constructor(org: Organization) {
-    this.totalPreMoneyShares = [
-      org.foundersNumberOfShares,
-      org.commonNumberOfShares,
-      org.warrantsNumberOfShares,
-      org.grantedOptionsNumberOfShares,
-      org.oldOptionsNumberOfShares,
-    ].reduce((memo, a) => memo + a, 0);
-    this.totalPreMoneyOwnershipValue = org.preMoneyValuation;
-
-    this.preMoneySharePrice = roundTo(
-      this.totalPreMoneyOwnershipValue / this.totalPreMoneyShares,
-      5
-    );
-
-    this.totalPostMoneyOwnershipValue =
-      org.preMoneyValuation + org.newMoneyRaised;
-
-    this.sharePriceForFinancing = this.calcSharePriceForFinancing(
-      this.totalPreMoneyShares,
-      this.totalPostMoneyOwnershipValue,
-      this.preMoneySharePrice,
-      org.newMoneyRaised,
-      org.postMoneyOptionPoolSize,
-      org.notes
-    );
-
-    const newOptionsShareClassShares = asShares(
-      (org.postMoneyOptionPoolSize * this.totalPostMoneyOwnershipValue) /
-        this.sharePriceForFinancing
-    );
-
-    const notesShareClassPostMoneyShares = org.notes.reduce(
-      (memo: number, note: Note) => {
-        return (
-          memo +
-          note.shares(this.sharePriceForFinancing, this.totalPreMoneyShares)
-        );
-      },
-      0
-    );
-
-    const newMoneyShareClassPostMoneyShares = asShares(
-      org.newMoneyRaised / this.sharePriceForFinancing
-    );
-
-    this.totalPostMoneyShares = [
-      this.totalPreMoneyShares,
-      newOptionsShareClassShares,
-      notesShareClassPostMoneyShares,
-      newMoneyShareClassPostMoneyShares,
-    ].reduce((memo, a) => memo + a, 0);
-
-    this.shareClasses = [
-      new ShareClass({
-        name: "Founders' Shares",
-        preMoneyShares: org.foundersNumberOfShares,
-        postMoneyShares: org.foundersNumberOfShares,
-      }),
-      new ShareClass({
-        name: "Rest of Common",
-        preMoneyShares: org.commonNumberOfShares,
-        postMoneyShares: org.commonNumberOfShares,
-      }),
-      new ShareClass({
-        name: "Warrants",
-        preMoneyShares: org.warrantsNumberOfShares,
-        postMoneyShares: org.warrantsNumberOfShares,
-      }),
-      new ShareClass({
-        name: "Granted Options",
-        preMoneyShares: org.grantedOptionsNumberOfShares,
-        postMoneyShares: org.grantedOptionsNumberOfShares,
-      }),
-      new ShareClass({
-        name: "Options Available before",
-        preMoneyShares: org.oldOptionsNumberOfShares,
-        postMoneyShares: org.oldOptionsNumberOfShares,
-      }),
-      new ShareClass({
-        name: "New Options for Pool",
-        preMoneyShares: 0,
-        postMoneyShares: newOptionsShareClassShares,
-      }),
-      new ShareClass({
-        name: "Convertible Notes Into New Share Class",
-        preMoneyShares: 0,
-        postMoneyShares: notesShareClassPostMoneyShares,
-      }),
-      new ShareClass({
-        name: "New Money Equity",
-        preMoneyShares: 0,
-        postMoneyShares: newMoneyShareClassPostMoneyShares,
-      }),
-    ];
-
-    this.totalPostMoneyOwnershipValue = this.shareClasses.reduce(
-      (sum, sc) =>
-        sum + sc.postMoneyOwnershipValue(this.sharePriceForFinancing),
-      0
-    );
-    this.totalPostMoneyPercentOwnership = this.shareClasses.reduce(
-      (sum, sc) =>
-        sum + sc.postMoneyPercentOwnership(this.totalPostMoneyShares),
-      0
-    );
-    this.totalPostMoneyValueChange = this.shareClasses.reduce(
-      (sum, sc) =>
-        sum +
-        sc.postMoneyValueChange(
-          this.sharePriceForFinancing,
-          this.preMoneySharePrice
-        ),
-      0
-    );
-    this.totalPostMoneyDilution = this.shareClasses.reduce(
-      (sum, sc) =>
-        sum +
-        sc.postMoneyDilution(
-          this.totalPostMoneyShares,
-          this.totalPreMoneyShares
-        ),
-      0
-    );
+    this.organization = org;
   }
 
-  calcSharePriceForFinancing(
+  static calcSharePriceForFinancing(
     totalPreMoneyShares: number,
     totalPostMoneyOwnershipValue: number,
     preMoneySharePrice: number,
@@ -171,6 +57,156 @@ class CapTable {
       5 // decimals
     );
     return roundTo(spff, 5);
+  }
+
+  shareClasses(): ShareClass[] {
+    return [
+      new ShareClass({
+        name: "Founders' Shares",
+        preMoneyShares: this.organization.foundersNumberOfShares,
+        postMoneyShares: this.organization.foundersNumberOfShares,
+      }),
+      new ShareClass({
+        name: "Rest of Common",
+        preMoneyShares: this.organization.commonNumberOfShares,
+        postMoneyShares: this.organization.commonNumberOfShares,
+      }),
+      new ShareClass({
+        name: "Warrants",
+        preMoneyShares: this.organization.warrantsNumberOfShares,
+        postMoneyShares: this.organization.warrantsNumberOfShares,
+      }),
+      new ShareClass({
+        name: "Granted Options",
+        preMoneyShares: this.organization.grantedOptionsNumberOfShares,
+        postMoneyShares: this.organization.grantedOptionsNumberOfShares,
+      }),
+      new ShareClass({
+        name: "Options Available before",
+        preMoneyShares: this.organization.oldOptionsNumberOfShares,
+        postMoneyShares: this.organization.oldOptionsNumberOfShares,
+      }),
+      new ShareClass({
+        name: "New Options for Pool",
+        preMoneyShares: 0,
+        postMoneyShares: this.newOptionsShareClassShares(),
+      }),
+      new ShareClass({
+        name: "Convertible Notes Into New Share Class",
+        preMoneyShares: 0,
+        postMoneyShares: this.notesShareClassPostMoneyShares(),
+      }),
+      new ShareClass({
+        name: "New Money Equity",
+        preMoneyShares: 0,
+        postMoneyShares: this.newMoneyShareClassPostMoneyShares(),
+      }),
+    ];
+  }
+
+  totalPreMoneyShares(): number {
+    return [
+      this.organization.foundersNumberOfShares,
+      this.organization.commonNumberOfShares,
+      this.organization.warrantsNumberOfShares,
+      this.organization.grantedOptionsNumberOfShares,
+      this.organization.oldOptionsNumberOfShares,
+    ].reduce((memo, a) => memo + a, 0);
+  }
+
+  totalPostMoneyShares(): number {
+    return [
+      this.totalPreMoneyShares(),
+      this.newOptionsShareClassShares(),
+      this.notesShareClassPostMoneyShares(),
+      this.newMoneyShareClassPostMoneyShares(),
+    ].reduce((memo, a) => memo + a, 0);
+  }
+
+  totalPreMoneyOwnershipValue(): number {
+    return this.organization.preMoneyValuation;
+  }
+
+  totalPostMoneyOwnershipValue(): number {
+    return (
+      this.organization.preMoneyValuation + this.organization.newMoneyRaised
+    );
+  }
+
+  totalPostMoneyPercentOwnership(): number {
+    return this.shareClasses().reduce(
+      (sum, sc) =>
+        sum + sc.postMoneyPercentOwnership(this.totalPostMoneyShares()),
+      0
+    );
+  }
+
+  totalPostMoneyValueChange(): number {
+    return this.shareClasses().reduce(
+      (sum, sc) =>
+        sum +
+        sc.postMoneyValueChange(
+          this.sharePriceForFinancing(),
+          this.preMoneySharePrice()
+        ),
+      0
+    );
+  }
+
+  totalPostMoneyDilution(): number {
+    return this.shareClasses().reduce(
+      (sum, sc) =>
+        sum +
+        sc.postMoneyDilution(
+          this.totalPostMoneyShares(),
+          this.totalPreMoneyShares()
+        ),
+      0
+    );
+  }
+
+  preMoneySharePrice(): number {
+    return roundTo(
+      this.totalPreMoneyOwnershipValue() / this.totalPreMoneyShares(),
+      5
+    );
+  }
+
+  sharePriceForFinancing(): number {
+    if (this.spff === undefined) {
+      this.spff = CapTable.calcSharePriceForFinancing(
+        this.totalPreMoneyShares(),
+        this.totalPostMoneyOwnershipValue(),
+        this.preMoneySharePrice(),
+        this.organization.newMoneyRaised,
+        this.organization.postMoneyOptionPoolSize,
+        this.organization.notes
+      );
+    }
+    return this.spff;
+  }
+
+  private newOptionsShareClassShares(): number {
+    return asShares(
+      (this.organization.postMoneyOptionPoolSize *
+        this.totalPostMoneyOwnershipValue()) /
+        this.sharePriceForFinancing()
+    );
+  }
+
+  private notesShareClassPostMoneyShares(): number {
+    return this.organization.notes.reduce((memo: number, note: Note) => {
+      return (
+        memo +
+        note.shares(this.sharePriceForFinancing(), this.totalPreMoneyShares())
+      );
+    }, 0);
+  }
+
+  private newMoneyShareClassPostMoneyShares(): number {
+    return asShares(
+      this.organization.newMoneyRaised / this.sharePriceForFinancing()
+    );
   }
 }
 
