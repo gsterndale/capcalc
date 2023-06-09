@@ -1,14 +1,55 @@
-interface ShareClass {
-  name: string; // found in Organization for most ShareClasses, other are "Convertible Notes into New Share Class" & "New Money Equity"
-  preMoneyShares: number; // found in Organization for most ShareClasses, calculated for "Convertible Notes into New Share Class" & "New Money Equity"
-  preMoneyPercentOwnership: number;
-  preMoneyOwnershipValue: number;
+type ShareClassFields = {
+  name: string;
+  preMoneyShares: number;
   postMoneyShares: number;
-  postMoneyPercentOwnership: number;
-  postMoneyPercentChange: number;
-  postMoneyOwnershipValue: number;
-  postMoneyValueChange: number;
-  postMoneyDilution: number;
-}
+};
 
+class ShareClass implements ShareClassFields {
+  readonly name: string;
+  readonly preMoneyShares: number;
+  readonly postMoneyShares: number;
+
+  constructor(attrs: ShareClassFields) {
+    this.name = attrs.name;
+    this.preMoneyShares = attrs.preMoneyShares;
+    this.postMoneyShares = attrs.postMoneyShares;
+  }
+
+  preMoneyPercentOwnership(totalPreMoneyShares: number) {
+    return this.preMoneyShares / totalPreMoneyShares;
+  }
+  preMoneyOwnershipValue(preMoneySharePrice: number) {
+    return preMoneySharePrice * this.preMoneyShares;
+  }
+  postMoneyPercentOwnership(totalPostMoneyShares: number) {
+    return this.postMoneyShares / totalPostMoneyShares;
+  }
+  postMoneyOwnershipValue(sharePriceForFinancing: number) {
+    return sharePriceForFinancing * this.postMoneyShares;
+  }
+  postMoneyPercentChange(
+    totalPostMoneyShares: number,
+    totalPreMoneyShares: number
+  ) {
+    return (
+      this.postMoneyPercentOwnership(totalPostMoneyShares) -
+      this.preMoneyPercentOwnership(totalPreMoneyShares)
+    );
+  }
+  postMoneyValueChange(
+    sharePriceForFinancing: number,
+    preMoneySharePrice: number
+  ) {
+    return (
+      this.postMoneyOwnershipValue(sharePriceForFinancing) -
+      this.preMoneyOwnershipValue(preMoneySharePrice)
+    );
+  }
+  postMoneyDilution(totalPostMoneyShares: number, totalPreMoneyShares: number) {
+    return (
+      this.postMoneyPercentChange(totalPostMoneyShares, totalPreMoneyShares) /
+      this.preMoneyPercentOwnership(totalPreMoneyShares)
+    );
+  }
+}
 export default ShareClass;

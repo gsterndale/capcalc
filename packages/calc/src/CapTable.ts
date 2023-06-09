@@ -3,16 +3,6 @@ import Organization from "./Organization";
 import { Note } from "./Note";
 import ShareClass from "./ShareClass";
 
-interface BuildShareClassParameters {
-  name: string;
-  preMoneyShares: number;
-  postMoneyShares: number;
-  preMoneySharePrice: number;
-  sharePriceForFinancing: number;
-  totalPreMoneyShares: number;
-  totalPostMoneyShares: number;
-}
-
 class CapTable {
   shareClasses!: ShareClass[];
   totalPreMoneyShares!: number;
@@ -81,131 +71,90 @@ class CapTable {
       newMoneyShareClassPostMoneyShares,
     ].reduce((memo, a) => memo + a, 0);
 
-    const aggregates = {
-      preMoneySharePrice: this.preMoneySharePrice,
-      sharePriceForFinancing: this.sharePriceForFinancing,
-      totalPreMoneyShares: this.totalPreMoneyShares,
-      totalPostMoneyShares: this.totalPostMoneyShares,
-    };
-
-    const foundersShareClass = this.buildShareClass({
+    const foundersShareClass = new ShareClass({
       name: "Founders' Shares",
       preMoneyShares: this.organization.foundersNumberOfShares,
       postMoneyShares: this.organization.foundersNumberOfShares,
-      ...aggregates,
     });
 
-    const commonShareClass = this.buildShareClass({
+    const commonShareClass = new ShareClass({
       name: "Rest of Common",
       preMoneyShares: this.organization.commonNumberOfShares,
       postMoneyShares: this.organization.commonNumberOfShares,
-      ...aggregates,
     });
-    const warrantsShareClass = this.buildShareClass({
+    const warrantsShareClass = new ShareClass({
       name: "Warrants",
       preMoneyShares: this.organization.warrantsNumberOfShares,
       postMoneyShares: this.organization.warrantsNumberOfShares,
-      ...aggregates,
     });
-    const grantedOptionsShareClass = this.buildShareClass({
+    const grantedOptionsShareClass = new ShareClass({
       name: "Granted Options",
       preMoneyShares: this.organization.grantedOptionsNumberOfShares,
       postMoneyShares: this.organization.grantedOptionsNumberOfShares,
-      ...aggregates,
     });
-    const oldOptionsShareClass = this.buildShareClass({
+    const oldOptionsShareClass = new ShareClass({
       name: "Options Available before",
       preMoneyShares: this.organization.oldOptionsNumberOfShares,
       postMoneyShares: this.organization.oldOptionsNumberOfShares,
-      ...aggregates,
     });
 
-    const newOptionsShareClass = this.buildShareClass({
+    const newOptionsShareClass = new ShareClass({
       name: "New Options for Pool",
       preMoneyShares: 0,
       postMoneyShares: newOptionsShareClassShares,
-      ...aggregates,
     });
 
-    const notesShareClass = this.buildShareClass({
+    const notesShareClass = new ShareClass({
       name: "Convertible Notes Into New Share Class",
       preMoneyShares: 0,
       postMoneyShares: notesShareClassPostMoneyShares,
-      ...aggregates,
     });
 
-    const newMoneyShareClass = this.buildShareClass({
+    const newMoneyShareClass = new ShareClass({
       name: "New Money Equity",
       preMoneyShares: 0,
       postMoneyShares: newMoneyShareClassPostMoneyShares,
-      ...aggregates,
     });
 
-    const preMoneyShareClasses = [
+    this.shareClasses.push(
       foundersShareClass,
       commonShareClass,
       warrantsShareClass,
       grantedOptionsShareClass,
       oldOptionsShareClass,
-    ];
-
-    this.shareClasses.push(
-      ...preMoneyShareClasses,
       newOptionsShareClass,
       notesShareClass,
       newMoneyShareClass
     );
 
     this.totalPostMoneyOwnershipValue = this.shareClasses.reduce(
-      (sum, sc) => sum + sc.postMoneyOwnershipValue,
+      (sum, sc) =>
+        sum + sc.postMoneyOwnershipValue(this.sharePriceForFinancing),
       0
     );
     this.totalPostMoneyPercentOwnership = this.shareClasses.reduce(
-      (sum, sc) => sum + sc.postMoneyPercentOwnership,
+      (sum, sc) =>
+        sum + sc.postMoneyPercentOwnership(this.totalPostMoneyShares),
       0
     );
     this.totalPostMoneyValueChange = this.shareClasses.reduce(
-      (sum, sc) => sum + sc.postMoneyValueChange,
+      (sum, sc) =>
+        sum +
+        sc.postMoneyValueChange(
+          this.sharePriceForFinancing,
+          this.preMoneySharePrice
+        ),
       0
     );
     this.totalPostMoneyDilution = this.shareClasses.reduce(
-      (sum, sc) => sum + sc.postMoneyDilution,
+      (sum, sc) =>
+        sum +
+        sc.postMoneyDilution(
+          this.totalPostMoneyShares,
+          this.totalPreMoneyShares
+        ),
       0
     );
-  }
-
-  buildShareClass({
-    name,
-    preMoneyShares,
-    postMoneyShares,
-    preMoneySharePrice,
-    sharePriceForFinancing,
-    totalPreMoneyShares,
-    totalPostMoneyShares,
-  }: BuildShareClassParameters): ShareClass {
-    if (isNaN(totalPostMoneyShares) || totalPostMoneyShares <= 0)
-      throw new Error(`totalPostMoneyShares is ${totalPostMoneyShares}`);
-    const preMoneyPercentOwnership = preMoneyShares / totalPreMoneyShares;
-    const preMoneyOwnershipValue = preMoneySharePrice * preMoneyShares;
-    const postMoneyPercentOwnership = postMoneyShares / totalPostMoneyShares;
-    const postMoneyOwnershipValue = sharePriceForFinancing * postMoneyShares;
-    const postMoneyPercentChange =
-      postMoneyPercentOwnership - preMoneyPercentOwnership;
-    const postMoneyValueChange =
-      postMoneyOwnershipValue - preMoneyOwnershipValue;
-    const postMoneyDilution = postMoneyPercentChange / preMoneyPercentOwnership;
-    return {
-      name,
-      preMoneyShares,
-      preMoneyPercentOwnership,
-      preMoneyOwnershipValue,
-      postMoneyShares,
-      postMoneyPercentOwnership,
-      postMoneyOwnershipValue,
-      postMoneyPercentChange,
-      postMoneyValueChange,
-      postMoneyDilution,
-    };
   }
 
   calcNewOptionsShareClassShares(
