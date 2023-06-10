@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "@capcalc/web",
   "scripts": {
     "test": "jest",
     "dev": "next dev",
