@@ -483,52 +483,67 @@ const App: React.FC = () => {
 
       {capTable && (
         <div>
-          <h2>Results</h2>
-          <table>
+          <dl>
+            <dt>Pre-Money Share Price</dt>
+            <dd>{capTable.preMoneySharePrice()}</dd>
+            <dt>Share Price for Financing</dt>
+            <dd>{capTable.sharePriceForFinancing()}</dd>
+          </dl>
+          <table cellPadding={5} cellSpacing={0}>
+            <colgroup>
+              <col span={1} />
+              <col span={3} />
+              <col span={6} />
+            </colgroup>
             <thead>
               <tr>
-                <th>Function</th>
-                <th>Result</th>
+                <th></th>
+                <th colSpan={3} style={{borderRight: '1px solid black'}}>Pre-Money</th>
+                <th colSpan={6}>Post-Money</th>
+              </tr>
+              <tr>
+                <th></th>
+                <th>Shares</th>
+                <th>Ownership</th>
+                <th style={{borderRight: '1px solid black'}}>Ownership Value</th>
+                <th>Shares</th>
+                <th>Ownership</th>
+                <th>% Change</th>
+                <th>Ownership Value</th>
+                <th>Value Change</th>
+                <th>Dilution</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>preMoneySharePrice</td>
-                <td>{capTable.preMoneySharePrice()}</td>
-              </tr>
-              <tr>
-                <td>sharePriceForFinancing</td>
-                <td>{capTable.sharePriceForFinancing()}</td>
-              </tr>
-              <tr>
-                <td>totalPreMoneyShares</td>
-                <td>{capTable.totalPreMoneyShares()}</td>
-              </tr>
-              <tr>
-                <td>totalPreMoneyOwnershipValue</td>
-                <td>{capTable.totalPreMoneyOwnershipValue()}</td>
-              </tr>
-              <tr>
-                <td>totalPostMoneyShares</td>
-                <td>{capTable.totalPostMoneyShares()}</td>
-              </tr>
-              <tr>
-                <td>totalPostMoneyPercentOwnership</td>
-                <td>{capTable.totalPostMoneyPercentOwnership()}</td>
-              </tr>
-              <tr>
-                <td>totalPostMoneyOwnershipValue</td>
-                <td>{capTable.totalPostMoneyOwnershipValue()}</td>
-              </tr>
-              <tr>
-                <td>totalPostMoneyValueChange</td>
-                <td>{capTable.totalPostMoneyValueChange()}</td>
-              </tr>
-              <tr>
-                <td>totalPostMoneyDilution</td>
-                <td>{capTable.totalPostMoneyDilution()}</td>
-              </tr>
+              {capTable.shareClasses().map((sc, index) => (
+                <tr>
+                  <td>{sc.name}</td>
+                  <td>{sc.preMoneyShares}</td>
+                  <td>{sc.preMoneyPercentOwnership(capTable.totalPreMoneyShares())}</td>
+                  <td style={{borderRight: '1px solid black'}}>{sc.preMoneyOwnershipValue(capTable.preMoneySharePrice())}</td>
+                  <td>{sc.postMoneyShares}</td>
+                  <td>{sc.postMoneyPercentOwnership(capTable.totalPostMoneyShares())}</td>
+                  <td>{sc.postMoneyPercentChange(capTable.totalPostMoneyShares(), capTable.totalPreMoneyShares())}</td>
+                  <td>{sc.postMoneyOwnershipValue(capTable.sharePriceForFinancing())}</td>
+                  <td>{sc.postMoneyValueChange(capTable.sharePriceForFinancing(),capTable.preMoneySharePrice())}</td>
+                  <td>{sc.postMoneyDilution(capTable.totalPostMoneyShares(), capTable.totalPreMoneyShares())}</td>
+                </tr>
+              ))}
             </tbody>
+            <tfoot>
+              <tr>
+                <th></th>
+                <th>{capTable.totalPreMoneyShares()}</th>
+                <th></th>
+                <th style={{borderRight: '1px solid black'}}>{capTable.totalPreMoneyOwnershipValue()}</th>
+                <th>{capTable.totalPostMoneyShares()}</th>
+                <th>{capTable.totalPostMoneyPercentOwnership()}</th>
+                <th></th>
+                <th>{capTable.totalPostMoneyOwnershipValue()}</th>
+                <th>{capTable.totalPostMoneyValueChange()}</th>
+                <th>{capTable.totalPostMoneyDilution()}</th>
+              </tr>
+            </tfoot>
           </table>
         </div>
       )}
