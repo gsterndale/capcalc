@@ -1,4 +1,4 @@
-import { Note } from "./Note";
+import { NoteFields } from "./Note";
 
 type Organization = {
   newShareClass: string;
@@ -8,7 +8,7 @@ type Organization = {
   notesConvertToNewClass: boolean;
   expandOptionPool: boolean;
   postMoneyOptionPoolSize: number;
-  notes: Note[];
+  notesFields: NoteFields[];
   foundersNumberOfShares: number;
   commonNumberOfShares: number;
   warrantsNumberOfShares: number;

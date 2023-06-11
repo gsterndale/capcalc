@@ -1,6 +1,6 @@
-import { Note, AbstractNoteFactory } from "./Note";
+import { Note, NoteFields } from "./Note";
 import Organization from "./Organization";
 import ShareClass from "./ShareClass";
 import CapTable from "./CapTable";
 
-export { Organization, CapTable, Note, AbstractNoteFactory, ShareClass };
+export { Organization, CapTable, Note, NoteFields, ShareClass };

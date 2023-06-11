@@ -1,10 +1,11 @@
 import { iterate, asUSD, asShares, roundTo } from "@capcalc/utils";
 import Organization from "./Organization";
-import { Note } from "./Note";
+import { AbstractNoteFactory, Note } from "./Note";
 import ShareClass from "./ShareClass";
 
 interface ICapTable {
   readonly organization: Organization;
+  readonly notes: Note[];
 
   shareClasses(): ShareClass[];
 
@@ -22,11 +23,15 @@ interface ICapTable {
 
 class CapTable implements ICapTable {
   organization: Organization;
+  notes: Note[];
 
   private spff: number | undefined; // used to cache result of expensive calculation
 
   constructor(org: Organization) {
     this.organization = org;
+    this.notes = org.notesFields.map((note) =>
+      AbstractNoteFactory.create(note)
+    );
   }
 
   static calcSharePriceForFinancing(
@@ -180,7 +185,7 @@ class CapTable implements ICapTable {
         this.preMoneySharePrice(),
         this.organization.newMoneyRaised,
         this.organization.postMoneyOptionPoolSize,
-        this.organization.notes
+        this.notes
       );
     }
     return this.spff;
@@ -195,7 +200,7 @@ class CapTable implements ICapTable {
   }
 
   private notesShareClassPostMoneyShares(): number {
-    return this.organization.notes.reduce((memo: number, note: Note) => {
+    return this.notes.reduce((memo: number, note: Note) => {
       return (
         memo +
         note.shares(this.sharePriceForFinancing(), this.totalPreMoneyShares())

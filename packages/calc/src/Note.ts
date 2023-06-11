@@ -136,4 +136,4 @@ class CappedNote extends ConvertibleNote {
   }
 }
 
-export { Note, AbstractNoteFactory };
+export { Note, NoteFields, AbstractNoteFactory };

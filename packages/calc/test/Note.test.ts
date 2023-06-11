@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
-import { Note, AbstractNoteFactory } from "../src/index";
+import { Note } from "../src/index";
+import { AbstractNoteFactory } from "../src/Note";
 
 const principal = 500000;
 const discount = 0.2;
