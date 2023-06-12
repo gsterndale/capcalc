@@ -118,7 +118,7 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <h1>Pro Forma Cap Table</h1>
+      <h1 className="text-3xl font-bold underline">Pro Forma Cap Table</h1>
       <form onSubmit={handleSubmit}>
         <table>
           <thead>
