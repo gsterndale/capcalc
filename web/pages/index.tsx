@@ -1,5 +1,6 @@
 import React, { useState, FormEvent } from 'react';
 import { CapTable, Organization, NoteFields } from '@capcalc/calc';
+import { asShares, asUSD, asPercent } from '@capcalc/utils';
 
 const initialOrganizationState: Organization = {
   newShareClass: '',
@@ -294,7 +295,102 @@ const App: React.FC = () => {
               </th>
             </tr>
           </thead>
+          {organization.notesFields.map((note, index) => (
+            <tbody>
+              <tr key={index}>
+                <th colSpan={2}>Note {index + 1}</th>
+              </tr>
+              <tr>
+                <td>
+                  <label>Principal Invested:</label>
+                </td>
+                <td>
+                    <input
+                      type="number"
+                      name={`notesFields[${index}].principalInvested`}
+                      value={note.principalInvested}
+                      onChange={handleNoteFieldsInputChange}
+                    />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Conversion Discount:</label>
+                </td>
+                <td>
+                    <input
+                      type="number"
+                      name={`notesFields[${index}].conversionDiscount`}
+                      value={note.conversionDiscount}
+                      onChange={handleNoteFieldsInputChange}
+                    />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Converstion Cap:</label>
+                </td>
+                <td>
+                    <input
+                      type="number"
+                      name={`notesFields[${index}].conversionCap`}
+                      value={note.conversionCap}
+                      onChange={handleNoteFieldsInputChange}
+                    />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Conversion Date:</label>
+                </td>
+                <td>
+                    <input
+                      type="date"
+                      name={`notesFields[${index}].conversionDate`}
+                      value={inputDateFormat(note.conversionDate)}
+                      onChange={handleNoteFieldsInputChange}
+                    />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Interest Rate:</label>
+                </td>
+                <td>
+                    <input
+                      type="number"
+                      name={`notesFields[${index}].interestRate`}
+                      value={note.interestRate}
+                      onChange={handleNoteFieldsInputChange}
+                    />
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Interest Start Date:</label>
+                </td>
+                <td>
+                    <input
+                      type="date"
+                      name={`notesFields[${index}].interestStartDate`}
+                      value={inputDateFormat(note.interestStartDate)}
+                      onChange={handleNoteFieldsInputChange}
+                    />
+                </td>
+              </tr>
+              <tr>
+                <th colSpan={2}>
+                      <button type="button" onClick={() => removeNoteField(index)}>
+                        Remove Note Field
+                      </button>
+                </th>
+              </tr>
+            </tbody>
+          ))}
           <tbody>
+              <tr>
+                <th colSpan={2}>New Note</th>
+              </tr>
             <tr>
               <td>
                 <label>Principal Invested:</label>
@@ -317,6 +413,19 @@ const App: React.FC = () => {
                     type="number"
                     name="conversionDiscount"
                     value={noteFields.conversionDiscount}
+                    onChange={handleNoteFieldsInputChange}
+                  />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label>Conversion Cap:</label>
+              </td>
+              <td>
+                  <input
+                    type="number"
+                    name="conversionCap"
+                    value={noteFields.conversionCap}
                     onChange={handleNoteFieldsInputChange}
                   />
               </td>
@@ -362,115 +471,10 @@ const App: React.FC = () => {
             </tr>
             <tr>
               <td>
-                <label>Conversion Cap:</label>
-              </td>
-              <td>
-                  <input
-                    type="number"
-                    name="conversionCap"
-                    value={noteFields.conversionCap}
-                    onChange={handleNoteFieldsInputChange}
-                  />
-              </td>
-            </tr>
-            <tr>
-              <td>
                 <button type="button" onClick={addNoteField}>+</button>
               </td>
             </tr>
           </tbody>
-          {organization.notesFields.map((note, index) => (
-            <tbody>
-              <tr key={index}>
-                <th colSpan={2}>Note {index + 1}</th>
-              </tr>
-              <tr>
-                <td>
-                  <label>Principal Invested:</label>
-                </td>
-                <td>
-                    <input
-                      type="number"
-                      name={`notesFields[${index}].principalInvested`}
-                      value={note.principalInvested}
-                      onChange={handleNoteFieldsInputChange}
-                    />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label>Conversion Discount:</label>
-                </td>
-                <td>
-                    <input
-                      type="number"
-                      name={`notesFields[${index}].conversionDiscount`}
-                      value={note.conversionDiscount}
-                      onChange={handleNoteFieldsInputChange}
-                    />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label>Conversion Date:</label>
-                </td>
-                <td>
-                    <input
-                      type="date"
-                      name={`notesFields[${index}].conversionDate`}
-                      value={inputDateFormat(note.conversionDate)}
-                      onChange={handleNoteFieldsInputChange}
-                    />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label>Interest Rate:</label>
-                </td>
-                <td>
-                    <input
-                      type="number"
-                      name={`notesFields[${index}].interestRate`}
-                      value={note.interestRate}
-                      onChange={handleNoteFieldsInputChange}
-                    />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label>Interest Start Date:</label>
-                </td>
-                <td>
-                    <input
-                      type="date"
-                      name={`notesFields[${index}].interestStartDate`}
-                      value={inputDateFormat(note.interestStartDate)}
-                      onChange={handleNoteFieldsInputChange}
-                    />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label>Converstion Cap:</label>
-                </td>
-                <td>
-                    <input
-                      type="number"
-                      name={`notesFields[${index}].conversionCap`}
-                      value={note.conversionCap}
-                      onChange={handleNoteFieldsInputChange}
-                    />
-                </td>
-              </tr>
-              <tr>
-                <th colSpan={2}>
-                      <button type="button" onClick={() => removeNoteField(index)}>
-                        Remove Note Field
-                      </button>
-                </th>
-              </tr>
-            </tbody>
-          ))}
           <tfoot>
             <tr>
               <th colSpan={2}>
@@ -489,13 +493,13 @@ const App: React.FC = () => {
             <dt>Share Price for Financing</dt>
             <dd>{capTable.sharePriceForFinancing()}</dd>
           </dl>
-          <table cellPadding={5} cellSpacing={0}>
+          <table cellPadding={5} cellSpacing={0} style={{textAlign: "right"}}>
             <colgroup>
               <col span={1} />
               <col span={3} />
               <col span={6} />
             </colgroup>
-            <thead>
+            <thead style={{textAlign: "center"}}>
               <tr>
                 <th></th>
                 <th colSpan={3} style={{borderRight: '1px solid black'}}>Pre-Money</th>
@@ -518,30 +522,30 @@ const App: React.FC = () => {
               {capTable.shareClasses().map((sc, index) => (
                 <tr>
                   <td>{sc.name}</td>
-                  <td>{sc.preMoneyShares}</td>
-                  <td>{sc.preMoneyPercentOwnership(capTable.totalPreMoneyShares())}</td>
-                  <td style={{borderRight: '1px solid black'}}>{sc.preMoneyOwnershipValue(capTable.preMoneySharePrice())}</td>
-                  <td>{sc.postMoneyShares}</td>
-                  <td>{sc.postMoneyPercentOwnership(capTable.totalPostMoneyShares())}</td>
-                  <td>{sc.postMoneyPercentChange(capTable.totalPostMoneyShares(), capTable.totalPreMoneyShares())}</td>
-                  <td>{sc.postMoneyOwnershipValue(capTable.sharePriceForFinancing())}</td>
-                  <td>{sc.postMoneyValueChange(capTable.sharePriceForFinancing(),capTable.preMoneySharePrice())}</td>
-                  <td>{sc.postMoneyDilution(capTable.totalPostMoneyShares(), capTable.totalPreMoneyShares())}</td>
+                  <td>{asShares(sc.preMoneyShares)}</td>
+                  <td>{asPercent(sc.preMoneyPercentOwnership(capTable.totalPreMoneyShares()))}%</td>
+                  <td style={{borderRight: '1px solid black'}}>${asUSD(sc.preMoneyOwnershipValue(capTable.preMoneySharePrice()))}</td>
+                  <td>{asShares(sc.postMoneyShares)}</td>
+                  <td>{asPercent(sc.postMoneyPercentOwnership(capTable.totalPostMoneyShares()))}%</td>
+                  <td>{asPercent(sc.postMoneyPercentChange(capTable.totalPostMoneyShares(), capTable.totalPreMoneyShares()))}%</td>
+                  <td>${asUSD(sc.postMoneyOwnershipValue(capTable.sharePriceForFinancing()))}</td>
+                  <td>${asUSD(sc.postMoneyValueChange(capTable.sharePriceForFinancing(),capTable.preMoneySharePrice()))}</td>
+                  <td>{asPercent(sc.postMoneyDilution(capTable.totalPostMoneyShares(), capTable.totalPreMoneyShares()))}%</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
-                <th></th>
-                <th>{capTable.totalPreMoneyShares()}</th>
-                <th></th>
-                <th style={{borderRight: '1px solid black'}}>{capTable.totalPreMoneyOwnershipValue()}</th>
-                <th>{capTable.totalPostMoneyShares()}</th>
-                <th>{capTable.totalPostMoneyPercentOwnership()}</th>
-                <th></th>
-                <th>{capTable.totalPostMoneyOwnershipValue()}</th>
-                <th>{capTable.totalPostMoneyValueChange()}</th>
-                <th>{capTable.totalPostMoneyDilution()}</th>
+                <td></td>
+                <td>{asShares(capTable.totalPreMoneyShares())}</td>
+                <td></td>
+                <td style={{borderRight: '1px solid black'}}>${asUSD(capTable.totalPreMoneyOwnershipValue())}</td>
+                <td>{asShares(capTable.totalPostMoneyShares())}</td>
+                <td>{asPercent(capTable.totalPostMoneyPercentOwnership())}%</td>
+                <td></td>
+                <td>${asUSD(capTable.totalPostMoneyOwnershipValue())}</td>
+                <td>${asUSD(capTable.totalPostMoneyValueChange())}</td>
+                <td></td>
               </tr>
             </tfoot>
           </table>

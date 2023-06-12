@@ -82,6 +82,16 @@ class CapTable implements ICapTable {
         postMoneyShares: this.organization.warrantsNumberOfShares,
       }),
       new ShareClass({
+        name: "Convertible Notes Into New Share Class",
+        preMoneyShares: 0,
+        postMoneyShares: this.notesShareClassPostMoneyShares(),
+      }),
+      new ShareClass({
+        name: "New Money Equity",
+        preMoneyShares: 0,
+        postMoneyShares: this.newMoneyShareClassPostMoneyShares(),
+      }),
+      new ShareClass({
         name: "Granted Options",
         preMoneyShares: this.organization.grantedOptionsNumberOfShares,
         postMoneyShares: this.organization.grantedOptionsNumberOfShares,
@@ -95,16 +105,6 @@ class CapTable implements ICapTable {
         name: "New Options for Pool",
         preMoneyShares: 0,
         postMoneyShares: this.newOptionsShareClassShares(),
-      }),
-      new ShareClass({
-        name: "Convertible Notes Into New Share Class",
-        preMoneyShares: 0,
-        postMoneyShares: this.notesShareClassPostMoneyShares(),
-      }),
-      new ShareClass({
-        name: "New Money Equity",
-        preMoneyShares: 0,
-        postMoneyShares: this.newMoneyShareClassPostMoneyShares(),
       }),
     ];
   }

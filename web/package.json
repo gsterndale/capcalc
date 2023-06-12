@@ -1,5 +1,6 @@
 {
   "name": "@capcalc/web",
+  "version": "1.0.0",
   "scripts": {
     "test": "jest",
     "dev": "next dev",
@@ -18,6 +19,7 @@
     "next": "^13.4.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@capcalc/calc": "^1.0.0"
+    "@capcalc/calc": "^1.0.0",
+    "@capcalc/utils": "^1.0.0"
   }
 }

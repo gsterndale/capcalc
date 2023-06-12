@@ -13,4 +13,8 @@ function asShares(num: number) {
   return roundTo(num, 0);
 }
 
-export { roundTo, asShares, asUSD };
+function asPercent(num: number) {
+  return roundTo(num * 100, 1);
+}
+
+export { roundTo, asShares, asUSD, asPercent };
