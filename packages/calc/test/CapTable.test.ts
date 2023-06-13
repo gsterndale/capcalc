@@ -26,8 +26,8 @@ describe("share price for financing given one override convertible note", () => 
     const spff = CapTable.calcSharePriceForFinancing(
       10000000,
       30000000 + 1000000,
-      30000000 / 10000000,
-      1000000,
+      30000000,
+      100000,
       0.2,
       [
         AbstractNoteFactory.create({
@@ -38,7 +38,7 @@ describe("share price for financing given one override convertible note", () => 
         }),
       ]
     );
-    expect(spff).toBeCloseTo(2.16364, 5);
+    expect(spff).toBeCloseTo(2.18349, 5); // OLD 2.16364, Excel $2.224969, Sheets $2.18349
   });
 });
 
@@ -73,11 +73,11 @@ describe("a capitalization table with one override convertible note", () => {
   });
 
   test("share price for financing", () => {
-    expect(table.sharePriceForFinancing()).toBeCloseTo(2.16364, 5);
+    expect(table.sharePriceForFinancing()).toBeCloseTo(2.18349, 5);
   });
 
   test("has total post-money shares", () => {
-    expect(table.totalPostMoneyShares()).toBe(14327725);
+    expect(table.totalPostMoneyShares()).toBe(14197473);
   });
 
   test("has total post-money ownership value", () => {
@@ -115,7 +115,7 @@ describe("a capitalization table with one override convertible note", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 462184,
+        postMoneyShares: 457982,
       })
     );
   });
@@ -125,7 +125,7 @@ describe("a capitalization table with one override convertible note", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 2865541,
+        postMoneyShares: 2739491,
       })
     );
   });
@@ -177,7 +177,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   });
 
   test("share price for financing", () => {
-    expect(table.sharePriceForFinancing()).toBeCloseTo(2.06541, 5);
+    expect(table.sharePriceForFinancing()).toBeCloseTo(2.08349, 5);
   });
 
   test("total post-money ownership value", () => {
@@ -198,10 +198,18 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   });
 
   test("New options share class post-money ownership %", () => {
-    const shareClass = findByName(table.shareClasses(), "New Options for Pool");
+    const newOptionsShareClass = findByName(
+      table.shareClasses(),
+      "New Options for Pool"
+    );
+    const oldOptionsShareClass = findByName(
+      table.shareClasses(),
+      "Options Available before"
+    );
     const totalPostMoneyShares = table.totalPostMoneyShares();
     expect(
-      shareClass.postMoneyPercentOwnership(totalPostMoneyShares)
+      newOptionsShareClass.postMoneyPercentOwnership(totalPostMoneyShares) +
+        oldOptionsShareClass.postMoneyPercentOwnership(totalPostMoneyShares)
     ).toBeCloseTo(org.postMoneyOptionPoolSize, 2);
   });
 
@@ -223,7 +231,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 484165,
+        postMoneyShares: 479964,
       })
     );
   });
@@ -233,7 +241,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 3001825,
+        postMoneyShares: 2875776,
       })
     );
   });

@@ -37,27 +37,31 @@ class CapTable implements ICapTable {
   static calcSharePriceForFinancing(
     totalPreMoneyShares: number,
     totalPostMoneyOwnershipValue: number,
-    preMoneySharePrice: number,
-    newMoneyRaised: number,
+    preMoneyValuation: number,
+    oldOptionsNumberOfShares: number,
     postMoneyOptionPoolSize: number,
     notes: Note[]
   ): number {
+    const startingGuess = preMoneyValuation / totalPreMoneyShares; // preMoneySharePrice
     let spff: number = iterate(
       (guess: number): number => {
-        const notesShareClassValue = notes.reduce(
+        const notesShareClassShares = notes.reduce(
           (memo: number, note: Note) => {
-            return memo + note.value(guess, totalPreMoneyShares);
+            return memo + note.shares(guess, totalPreMoneyShares);
           },
           0
         );
-        return (
-          (totalPostMoneyOwnershipValue * (1 - postMoneyOptionPoolSize) -
-            newMoneyRaised -
-            notesShareClassValue) /
-          totalPreMoneyShares
-        );
+        const guessNewAndOldOptionsNumberOfShares =
+          (postMoneyOptionPoolSize * totalPostMoneyOwnershipValue) / guess;
+        const guessNewOptionsNumberOfShares =
+          guessNewAndOldOptionsNumberOfShares - oldOptionsNumberOfShares;
+        const totalSharesBeforeFinancing =
+          totalPreMoneyShares +
+          guessNewOptionsNumberOfShares +
+          notesShareClassShares;
+        return preMoneyValuation / totalSharesBeforeFinancing;
       },
-      preMoneySharePrice, // starting guess
+      startingGuess, // starting guess
       1000, // iterations
       5 // decimals
     );
@@ -182,8 +186,8 @@ class CapTable implements ICapTable {
       this.spff = CapTable.calcSharePriceForFinancing(
         this.totalPreMoneyShares(),
         this.totalPostMoneyOwnershipValue(),
-        this.preMoneySharePrice(),
-        this.organization.newMoneyRaised,
+        this.organization.preMoneyValuation,
+        this.organization.oldOptionsNumberOfShares,
         this.organization.postMoneyOptionPoolSize,
         this.notes
       );
@@ -195,7 +199,8 @@ class CapTable implements ICapTable {
     return asShares(
       (this.organization.postMoneyOptionPoolSize *
         this.totalPostMoneyOwnershipValue()) /
-        this.sharePriceForFinancing()
+        this.sharePriceForFinancing() -
+        this.organization.oldOptionsNumberOfShares
     );
   }
 
