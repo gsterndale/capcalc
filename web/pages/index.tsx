@@ -1,7 +1,7 @@
 import React, { useState, FormEvent } from 'react';
 import { CapTable, Organization, NoteFields } from '@capcalc/calc';
 import { asShares, asUSD, asPercent } from '@capcalc/utils';
-import { Table, Button, Checkbox, Label, TextInput } from 'flowbite-react';
+import { Table, Button, Checkbox, Label, TextInput, Sidebar } from 'flowbite-react';
 import { TbTable, TbTrash, TbRowInsertBottom } from "react-icons/tb";
 
 const initialOrganizationState: Organization = {
@@ -120,8 +120,8 @@ const App: React.FC = () => {
 
   return (
     <div>
-      
-      <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-4">
+      <Sidebar aria-label="Organization">
+      <form onSubmit={handleSubmit} className="">
         <div>
           <div>Organization</div>
           <Label htmlFor="newShareClass"> New Share Class:</Label>
@@ -181,12 +181,13 @@ const App: React.FC = () => {
         <Label>Interest Rate:</Label>
         <TextInput type="number" name="interestRate" value={noteFields.interestRate} onChange={handleNoteFieldsInputChange} />
         <Label>Interest Start Date:</Label>
-        <TextInput type="date" name="interestStarTable.Cellate" value={inputDateFormat(noteFields.interestStartDate)} onChange={handleNoteFieldsInputChange} />
+        <TextInput type="date" name="interestStartDate" value={inputDateFormat(noteFields.interestStartDate)} onChange={handleNoteFieldsInputChange} />
         <Button onClick={addNoteField}><TbRowInsertBottom className='mr-2 h-5 w-5' />Add</Button>
         <Button onClick={handleSubmit}><TbTable className='mr-2 h-5 w-5' />Generate Cap Table</Button>
       </form>
+      </Sidebar>
     {capTable && (
-      <div>
+      <div className="p-4 sm:ml-64">
         <h1 className="text-3xl font-bold underline">Pro Forma Cap Table</h1>
         <dl>
           <dt>Pre-Money Share Price</dt>
