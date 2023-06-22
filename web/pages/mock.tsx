@@ -1,7 +1,8 @@
-import React, { useState, FormEvent } from "react";
+import React, { useState, useRef, FormEvent } from "react";
 import {
   Button,
   Tabs,
+  type TabsRef,
   TextInput,
   Label,
   Checkbox,
@@ -41,6 +42,10 @@ import {
 } from "react-icons/tb";
 
 const Playground: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<number>(0);
+  const tabsRef = useRef<TabsRef>(null);
+  const props = { setActiveTab, tabsRef };
+
   return (
     <div className="mx-5 my-5">
       <div className="my-5">
@@ -65,6 +70,8 @@ const Playground: React.FC = () => {
           aria-label="Tabs"
           style="underline"
           className="justify-center min-w-fit"
+          ref={props.tabsRef}
+          onActiveTabChange={(tab) => props.setActiveTab(tab)}
         >
           <Tabs.Item active icon={TbCoin} title="New Round">
             <div className="flex justify-center">
@@ -88,8 +95,12 @@ const Playground: React.FC = () => {
                     placeholder="Series A"
                   />
                 </fieldset>
-                <div className="flex gap-2 my-2" role="group">
-                  <Button size="sm" color="gray">
+                <div className="flex gap-2 my-2 justify-end" role="group">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => props.tabsRef.current?.setActiveTab(1)}
+                  >
                     <p>Next</p>
                     <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -181,12 +192,20 @@ const Playground: React.FC = () => {
                     </Table.Body>
                   </Table>
                 </fieldset>
-                <div className="flex gap-2 my-2" role="group">
-                  <Button size="sm" color="gray">
-                    <TbSquareRoundedArrowLeft className="ml-2 h-5 w-5" />
+                <div className="flex gap-2 my-2 justify-end" role="group">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => props.tabsRef.current?.setActiveTab(0)}
+                  >
+                    <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
                     <p>Back</p>
                   </Button>
-                  <Button size="sm" color="gray">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => props.tabsRef.current?.setActiveTab(2)}
+                  >
                     <p>Next</p>
                     <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -331,12 +350,20 @@ const Playground: React.FC = () => {
                     </div>
                   </div>
                 </fieldset>
-                <div className="flex gap-2 my-2" role="group">
-                  <Button size="sm" color="gray">
-                    <TbSquareRoundedArrowLeft className="ml-2 h-5 w-5" />
+                <div className="flex gap-2 my-2 justify-end" role="group">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => props.tabsRef.current?.setActiveTab(1)}
+                  >
+                    <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
                     <p>Back</p>
                   </Button>
-                  <Button size="sm" color="gray">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => props.tabsRef.current?.setActiveTab(3)}
+                  >
                     <p>Next</p>
                     <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -509,30 +536,24 @@ const Playground: React.FC = () => {
                         <Table.Cell>
                           <div className="inline-flex" role="group">
                             <Button size="xs" color="gray">
-                              <TbPencil className="h-4 w-4" />
-                            </Button>
-                            <Button size="xs" color="gray">
-                              <TbTable className="h-4 w-4" />
+                              <TbPencil className="mr-2 h-4 w-4" />
+                              <p>Edit</p>
                             </Button>
                           </div>
                         </Table.Cell>
                         <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
                           <div className="inline-flex" role="group">
                             <Button size="xs" color="gray">
-                              <TbPencil className="h-4 w-4" />
-                            </Button>
-                            <Button size="xs" color="gray">
-                              <TbTable className="h-4 w-4" />
+                              <TbPencil className="mr-2 h-4 w-4" />
+                              <p>Edit</p>
                             </Button>
                           </div>
                         </Table.Cell>
                         <Table.Cell>
                           <div className="inline-flex" role="group">
                             <Button size="xs" color="gray">
-                              <TbPencil className="h-4 w-4" />
-                            </Button>
-                            <Button size="xs" color="gray">
-                              <TbTable className="h-4 w-4" />
+                              <TbPencil className="mr-2 h-4 w-4" />
+                              <p>Edit</p>
                             </Button>
                           </div>
                         </Table.Cell>
@@ -651,15 +672,63 @@ const Playground: React.FC = () => {
                         </Table.Cell>
                         <Table.Cell>-30.8%</Table.Cell>
                       </Table.Row>
+                      <Table.Row>
+                        <Table.Cell colSpan={2}></Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            size="xs"
+                            color="gray"
+                            onClick={() =>
+                              props.tabsRef.current?.setActiveTab(4)
+                            }
+                          >
+                            <TbTable className="mr-2 h-4 w-4" />
+                            <p>Cap Table</p>
+                          </Button>
+                        </Table.Cell>
+                        <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
+                          <Button
+                            size="xs"
+                            color="gray"
+                            onClick={() =>
+                              props.tabsRef.current?.setActiveTab(4)
+                            }
+                          >
+                            <TbTable className="mr-2 h-4 w-4" />
+                            <p>Cap Table</p>
+                          </Button>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            size="xs"
+                            color="gray"
+                            onClick={() =>
+                              props.tabsRef.current?.setActiveTab(4)
+                            }
+                          >
+                            <TbTable className="mr-2 h-4 w-4" />
+                            <p>Cap Table</p>
+                          </Button>
+                        </Table.Cell>
+                        <Table.Cell></Table.Cell>
+                      </Table.Row>
                     </Table.Body>
                   </Table>
                 </fieldset>
-                <div className="flex gap-2 my-2" role="group">
-                  <Button size="sm" color="gray">
-                    <TbSquareRoundedArrowLeft className="ml-2 h-5 w-5" />
+                <div className="flex gap-2 my-2 justify-end" role="group">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => props.tabsRef.current?.setActiveTab(2)}
+                  >
+                    <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
                     <p>Back</p>
                   </Button>
-                  <Button size="sm" color="gray">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => props.tabsRef.current?.setActiveTab(4)}
+                  >
                     <p>Next</p>
                     <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -831,9 +900,13 @@ const Playground: React.FC = () => {
                     </Table.Row>
                   </tfoot>
                 </Table>
-                <div className="flex gap-2 my-2" role="group">
-                  <Button size="sm" color="gray">
-                    <TbSquareRoundedArrowLeft className="ml-2 h-5 w-5" />
+                <div className="flex gap-2 my-2 justify-end" role="group">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => props.tabsRef.current?.setActiveTab(3)}
+                  >
+                    <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
                     <p>Back</p>
                   </Button>
                 </div>
