@@ -16,11 +16,16 @@ type ShareClassRow = {
 };
 
 const inititalShareClassRows: ShareClassRow[] = [
-  { label: "Founders", key: "founders", percent: 0, shares: 0 },
-  { label: "Other Common", key: "common", percent: 0, shares: 0 },
+  { label: "Founders' Shares", key: "founders", percent: 0, shares: 0 },
+  { label: "Rest of Common", key: "common", percent: 0, shares: 0 },
   { label: "Warrants", key: "warrants", percent: 0, shares: 0 },
   { label: "Granted Options", key: "grantedOptions", percent: 0, shares: 0 },
-  { label: "Old Options", key: "oldOptions", percent: 0, shares: 0 },
+  {
+    label: "Options Available Before",
+    key: "oldOptions",
+    percent: 0,
+    shares: 0,
+  },
 ];
 
 const ShareClassList: React.FC<AppProps> = (props: AppProps) => {

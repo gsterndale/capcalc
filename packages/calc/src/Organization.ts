@@ -1,6 +1,8 @@
 import { NoteFields } from "./Note";
 
 type Organization = {
+  name: string;
+  description: string;
   newShareClass: string;
   preMoneyValuation: number;
   newMoneyRaised: number;

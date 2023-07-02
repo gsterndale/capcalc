@@ -204,7 +204,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     );
     const oldOptionsShareClass = findByName(
       table.shareClasses(),
-      "Options Available before"
+      "Options Available Before"
     );
     const totalPostMoneyShares = table.totalPostMoneyShares();
     expect(

@@ -101,7 +101,7 @@ class CapTable implements ICapTable {
         postMoneyShares: this.organization.grantedOptionsNumberOfShares,
       }),
       new ShareClass({
-        name: "Options Available before",
+        name: "Options Available Before",
         preMoneyShares: this.organization.oldOptionsNumberOfShares,
         postMoneyShares: this.organization.oldOptionsNumberOfShares,
       }),

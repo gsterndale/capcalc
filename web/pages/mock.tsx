@@ -86,6 +86,8 @@ const initialOrganizationState: Organization = {
     },
   ],
 
+  name: "Pied Piper, LLC",
+  description: "Ideal",
   newShareClass: "Series A",
   preMoneyValuation: 30000000,
   newMoneyRaised: 1000000,
@@ -101,12 +103,17 @@ const initialOrganizationState: Organization = {
 };
 
 const initialScenariosState: CapTable[] = [
-  new CapTable(initialOrganizationState),
-  new CapTable({ ...initialOrganizationState, newMoneyRaised: 2000000 }),
+  new CapTable({ ...initialOrganizationState, description: "Small" }),
+  new CapTable({
+    ...initialOrganizationState,
+    newMoneyRaised: 2000000,
+    description: "Large",
+  }),
   new CapTable({
     ...initialOrganizationState,
     preMoneyValuation: 28000000,
     postMoneyOptionPoolSize: 0.15,
+    description: "Small & Low",
   }),
 ];
 
@@ -132,20 +139,35 @@ const App: React.FC = () => {
     const name = `${shareClass.key}NumberOfShares`;
     setOrganizationProperty(name, shareClass.shares);
   };
+  const pick = <T extends {}, K extends keyof T>(obj: T, ...keys: K[]) =>
+    Object.fromEntries(
+      keys.filter((key) => key in obj).map((key) => [key, obj[key]])
+    ) as Pick<T, K>;
 
   const setOrganizationProperty = (name: string, value: any) => {
-    // only if name is in common Organization props
     console.log({ orgChange: { name, value, organization } });
-
     setOrganization((prevOrganization) => {
       const newOrganization = {
         ...prevOrganization,
         [name]: value,
       };
 
-      setScenarios((prevScenarios) =>
-        prevScenarios.map((capTable) => new CapTable(newOrganization))
-      );
+      setScenarios((prevScenarios) => {
+        const commonProps = pick(
+          newOrganization,
+          "newShareClass",
+          "foundersNumberOfShares",
+          "commonNumberOfShares",
+          "warrantsNumberOfShares",
+          "grantedOptionsNumberOfShares",
+          "oldOptionsNumberOfShares"
+        );
+
+        return prevScenarios.map((capTable) => {
+          const prevOrg = capTable.organization;
+          return new CapTable({ ...prevOrg, ...commonProps });
+        });
+      });
 
       return newOrganization;
     });
@@ -156,7 +178,6 @@ const App: React.FC = () => {
   };
 
   const handleOrganizationInputChange = (
-    //React.FormEventHandler<HTMLFieldSetElement>
     event: React.FormEvent<HTMLFormElement> //React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type, checked } = event.target;
@@ -166,10 +187,13 @@ const App: React.FC = () => {
   };
 
   const [activeScenario, setActiveScenario] = useState<number>(0);
-  const handleActiveScenarioChange = (
+  const handleActiveScenarioInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const index = parseInt(event.target.value) || 0;
+    handleActiveScenarioChange(index);
+  };
+  const handleActiveScenarioChange = (index: number) => {
     setActiveScenario(index);
   };
 
@@ -214,6 +238,7 @@ const App: React.FC = () => {
                     name="name"
                     sizing="sm"
                     placeholder="Pied Piper LLC"
+                    value={organization.name}
                   />
                   <Label htmlFor="newShareClass">New Share Class</Label>
                   <TextInput
@@ -351,11 +376,15 @@ const App: React.FC = () => {
                 sizing="sm"
                 className=""
                 defaultValue={activeScenario}
-                onChange={handleActiveScenarioChange}
+                onChange={handleActiveScenarioInputChange}
               >
                 {scenarios.map((capTable, index) => (
-                  <option value={index} key={index}>
-                    {capTable.organization.newShareClass}:{" "}
+                  <option
+                    value={index}
+                    key={index}
+                    selected={index === activeScenario}
+                  >
+                    {capTable.organization.description}:{" "}
                     {prettyUSD(capTable.organization.newMoneyRaised)} @{" "}
                     {prettyUSD(capTable.organization.preMoneyValuation)}
                   </option>

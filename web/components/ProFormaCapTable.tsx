@@ -11,6 +11,7 @@ const ProFormaCapTable: React.FC<AppProps> = (props: AppProps) => {
     <Table hoverable className="font-mono ">
       <Table.Head className="text-center">
         <Table.HeadCell className="text-left text-base">
+          {props.capTable.organization.name}
           {props.capTable.organization.newShareClass}
         </Table.HeadCell>
         <Table.HeadCell colSpan={3} className="text-base">
@@ -21,8 +22,9 @@ const ProFormaCapTable: React.FC<AppProps> = (props: AppProps) => {
         </Table.HeadCell>
       </Table.Head>
       <Table.Head className="text-center">
-        {/* TODO */}
-        <Table.HeadCell className="text-left">Ideal</Table.HeadCell>
+        <Table.HeadCell className="text-left">
+          {props.capTable.organization.description}
+        </Table.HeadCell>
         <Table.HeadCell colSpan={3} className="">
           {prettyUSD(props.capTable.preMoneySharePrice(), 2)}/share
         </Table.HeadCell>

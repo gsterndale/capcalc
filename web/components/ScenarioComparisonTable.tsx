@@ -92,7 +92,7 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
         key: index,
         letter: alphabet[index],
 
-        description: `Ideal`,
+        description: capTable.organization.description,
         preMoneyValuation: capTable.organization.preMoneyValuation,
         newMoneyRaised: capTable.organization.newMoneyRaised,
         noteConversion: true,
@@ -303,7 +303,7 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
                 <option>Convertible Notes Into New Share Class</option>
                 <option>New Money Equity</option>
                 <option>Granted Options</option>
-                <option>Options Available before</option>
+                <option>Options Available Before</option>
                 <option>New Options for Pool</option>
               </Select>
             </div>
