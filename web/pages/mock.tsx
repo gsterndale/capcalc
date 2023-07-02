@@ -48,6 +48,7 @@ import {
   TbLayoutRows,
   TbStack3,
 } from "react-icons/tb";
+import { prettyShares, prettyUSD } from "@capcalc/utils";
 
 const initialOrganizationState: Organization = {
   notesFields: [
@@ -101,9 +102,14 @@ const initialOrganizationState: Organization = {
 
 const initialScenariosState: CapTable[] = [
   new CapTable(initialOrganizationState),
-  new CapTable(initialOrganizationState),
-  new CapTable(initialOrganizationState),
+  new CapTable({ ...initialOrganizationState, newMoneyRaised: 2000000 }),
+  new CapTable({
+    ...initialOrganizationState,
+    preMoneyValuation: 28000000,
+    postMoneyOptionPoolSize: 0.15,
+  }),
 ];
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [organization, setOrganization] = useState<Organization>(
@@ -114,6 +120,10 @@ const App: React.FC = () => {
   );
   const tabsRef = useRef<TabsRef>(null);
   const props = { setActiveTab, tabsRef };
+
+  const handleTabChange = (index: number) => {
+    props.tabsRef.current?.setActiveTab(index);
+  };
 
   const handleShareClassInputChange = (shareClass: {
     key: string;
@@ -153,6 +163,14 @@ const App: React.FC = () => {
     const inputValue = parseInput(value, type, checked);
 
     setOrganizationProperty(name, inputValue);
+  };
+
+  const [activeScenario, setActiveScenario] = useState<number>(0);
+  const handleActiveScenarioChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const index = parseInt(event.target.value) || 0;
+    setActiveScenario(index);
   };
 
   return (
@@ -296,7 +314,11 @@ const App: React.FC = () => {
             <div className="flex justify-center">
               <Card className="w-full lg:w-3/4 min-w-fit">
                 <fieldset>
-                  <ScenarioComparisonTable scenarios={scenarios} />
+                  <ScenarioComparisonTable
+                    scenarios={scenarios}
+                    handleTabChange={handleTabChange}
+                    handleActiveScenarioChange={handleActiveScenarioChange}
+                  />
                 </fieldset>
                 <div className="flex gap-2 my-2 justify-end" role="group">
                   <Button
@@ -324,16 +346,26 @@ const App: React.FC = () => {
               <h2 className="text-2xl dark:text-white mb-8 font-thin">
                 Dig into the detailed Pro Forma Cap Table for
               </h2>
-              <Select id="Scenario" sizing="sm" className="" defaultValue={0}>
-                <option>Scenario A: $10M @ $30M-PRE 20%ESOP</option>
-                <option>Scenario B: $12M @ $28M-PRE 25%ESOP</option>
-                <option>Scenario C: $12M @ $30M-PRE 20%ESOP</option>
+              <Select
+                id="Scenario"
+                sizing="sm"
+                className=""
+                defaultValue={activeScenario}
+                onChange={handleActiveScenarioChange}
+              >
+                {scenarios.map((capTable, index) => (
+                  <option value={index} key={index}>
+                    {capTable.organization.newShareClass}:{" "}
+                    {prettyUSD(capTable.organization.newMoneyRaised)} @{" "}
+                    {prettyUSD(capTable.organization.preMoneyValuation)}
+                  </option>
+                ))}
               </Select>
             </div>
 
             <div className="flex justify-center">
               <Card className="w-full lg:w-3/4 min-w-fit">
-                <ProFormaCapTable />
+                <ProFormaCapTable capTable={scenarios[activeScenario]} />
                 <div className="flex gap-2 my-2 justify-end" role="group">
                   <Button
                     size="sm"

@@ -18,7 +18,12 @@ function asPercent(num: number) {
 }
 
 function prettyUSD(num: number, decimals: number = 0) {
-  return `$${roundTo(num, decimals).toLocaleString("en-US")}`;
+  const USDollar = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: decimals,
+  });
+  return USDollar.format(roundTo(num, decimals));
 }
 
 function prettyPercent(num: number, decimals: number = 1) {

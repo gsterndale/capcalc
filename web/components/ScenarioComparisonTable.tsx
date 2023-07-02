@@ -57,6 +57,8 @@ type scenarioColumn = {
 
 type AppProps = {
   scenarios: CapTable[];
+  handleTabChange: Function;
+  handleActiveScenarioChange: Function;
 };
 const initialShareClassName = "Founders' Shares";
 
@@ -412,36 +414,21 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
         </Table.Row>
         <Table.Row>
           <Table.Cell colSpan={2}></Table.Cell>
-          <Table.Cell>
-            <Button
-              size="xs"
-              color="gray"
-              onClick={() => props.tabsRef.current?.setActiveTab(4)}
-            >
-              <TbTable className="mr-2 h-4 w-4" />
-              <p>Cap Table</p>
-            </Button>
-          </Table.Cell>
-          <Table.Cell>
-            <Button
-              size="xs"
-              color="gray"
-              onClick={() => props.tabsRef.current?.setActiveTab(4)}
-            >
-              <TbTable className="mr-2 h-4 w-4" />
-              <p>Cap Table</p>
-            </Button>
-          </Table.Cell>
-          <Table.Cell>
-            <Button
-              size="xs"
-              color="gray"
-              onClick={() => props.tabsRef.current?.setActiveTab(4)}
-            >
-              <TbTable className="mr-2 h-4 w-4" />
-              <p>Cap Table</p>
-            </Button>
-          </Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell>
+              <Button
+                size="xs"
+                color="gray"
+                onClick={() => {
+                  props.handleActiveScenarioChange(index);
+                  props.handleTabChange(4);
+                }}
+              >
+                <TbTable className="mr-2 h-4 w-4" />
+                <p>Cap Table</p>
+              </Button>
+            </Table.Cell>
+          ))}
           <Table.Cell></Table.Cell>
         </Table.Row>
       </Table.Body>
