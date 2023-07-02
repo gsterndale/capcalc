@@ -61,31 +61,54 @@ const initialNotesFieldsState: NoteFields[] = [
   },
 ];
 
+const pick = <T extends {}, K extends keyof T>(obj: T, ...keys: K[]) =>
+  Object.fromEntries(
+    keys.filter((key) => key in obj).map((key) => [key, obj[key]])
+  ) as Pick<T, K>;
+
 const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
   const [notesFields, setNotesFields] = useState<Array<NoteFields>>(
     initialNotesFieldsState
   );
 
-  const handleConvertibleNoteInputChange = (
-    //React.FormEventHandler<HTMLFieldSetElement>
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type, checked } = event.target;
-    const inputValue = parseInput(value, type, checked);
+  type InputValue = string | number | Date | boolean;
+  type FormEntry = [string, InputValue];
+  type HTMLFormControl =
+    | HTMLInputElement
+    | HTMLSelectElement
+    | HTMLTextAreaElement;
 
-    // TODO update notesFields element with inputValue
-    setNotesFields((prevState) => ({
-      ...prevState,
-      [name]: inputValue,
-    }));
-
-    props.handler("notesFields", notesFields);
+  const handleAddNoteSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const entries: FormEntry[] = Array.from(form.elements).reduce(
+      (memo, element) => {
+        const { name, value, type } = element as HTMLFormControl;
+        let inputValue = parseInput(value, type, undefined);
+        if (inputValue !== undefined && inputValue !== "") {
+          if (
+            ["conversionDiscount", "interestRate"].includes(name) &&
+            typeof inputValue == "number"
+          )
+            inputValue = inputValue / 100.0;
+          memo.push([name, inputValue]);
+        }
+        return memo;
+      },
+      [] as FormEntry[]
+    );
+    const noteFields = Object.fromEntries(entries) as NoteFields;
+    setNotesFields((prevState) => {
+      return prevState.concat(noteFields);
+    });
+    form.reset();
+    props.handler(notesFields);
   };
 
-  const removeNoteField = (index: number) => {
+  function handleRemoveNote(index: number): void {
     notesFields.splice(index, 1);
-    props.handler("notesFields", notesFields);
-  };
+    props.handler(notesFields);
+  }
 
   const summarizeNote = (note: NoteFields) => {
     let summary = [
@@ -129,7 +152,7 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                     <Button
                       size="xs"
                       color="gray"
-                      onClick={() => removeNoteField(index)}
+                      onClick={() => handleRemoveNote(index)}
                     >
                       <TbTrash className="h-4 w-4" />
                     </Button>
@@ -137,28 +160,17 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                 </div>
               </li>
             ))}
-
-            <li className="pb-0 pt-3 sm:pt-4 text-right">
-              <Button size="xs" color="gray">
-                <TbRowInsertBottom className="mr-2 h-5 w-5" />
-                <p>Add Convertible Note</p>
-              </Button>
-            </li>
           </ul>
         </div>
       </fieldset>
 
-      <fieldset>
+      <form onSubmit={handleAddNoteSubmit}>
         <legend>New Convertible Note</legend>
         <div className="grid gap-6 mb-6 md:grid-cols-3">
           <div className="flex flex-col gap-1">
             <div>
               <Label value="Name" />
-              <TextInput
-                sizing="sm"
-                name="name"
-                onChange={handleConvertibleNoteInputChange}
-              />
+              <TextInput sizing="sm" name="name" required={true} />
             </div>
           </div>
           <div className="flex flex-col gap-1">
@@ -169,6 +181,7 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                 sizing="sm"
                 name="principalInvested"
                 icon={TbCurrencyDollar}
+                required={true}
               />
             </div>
             <div>
@@ -178,6 +191,7 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                 sizing="sm"
                 name="conversionDiscount"
                 rightIcon={TbPercentage}
+                required={true}
               />
             </div>
             <div>
@@ -209,14 +223,14 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
               <TextInput type="date" sizing="sm" name="conversionDate" />
             </div>
             <div className="">
-              <Button size="xs" color="gray">
+              <Button size="xs" color="gray" type="submit">
                 <TbRowInsertBottom className="mr-2 h-5 w-5" />
                 <p>Save</p>
               </Button>
             </div>
           </div>
         </div>
-      </fieldset>
+      </form>
     </div>
   );
 };

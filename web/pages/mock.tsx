@@ -139,6 +139,11 @@ const App: React.FC = () => {
     const name = `${shareClass.key}NumberOfShares`;
     setOrganizationProperty(name, shareClass.shares);
   };
+
+  const handleNotesFieldsChange = (notesFields: NoteFields[]) => {
+    setOrganizationProperty("notesFields", notesFields);
+  };
+
   const pick = <T extends {}, K extends keyof T>(obj: T, ...keys: K[]) =>
     Object.fromEntries(
       keys.filter((key) => key in obj).map((key) => [key, obj[key]])
@@ -216,22 +221,22 @@ const App: React.FC = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <Tabs.Group
-          aria-label="Tabs"
-          style="underline"
-          className="justify-center min-w-fit"
-          ref={props.tabsRef}
-          onActiveTabChange={(tab) => props.setActiveTab(tab)}
-        >
-          <Tabs.Item active icon={TbCoin} title="New Round">
-            <div className="flex justify-center">
-              <h2 className="text-2xl dark:text-white mb-8 font-thin">
-                First, share some background on the organization.
-              </h2>
-            </div>
-            <div className="flex justify-center">
-              <Card className="w-full md:w-1/2 lg:w-1/3">
+      <Tabs.Group
+        aria-label="Tabs"
+        style="underline"
+        className="justify-center min-w-fit"
+        ref={props.tabsRef}
+        onActiveTabChange={(tab) => props.setActiveTab(tab)}
+      >
+        <Tabs.Item active icon={TbCoin} title="New Round">
+          <div className="flex justify-center">
+            <h2 className="text-2xl dark:text-white mb-8 font-thin">
+              First, share some background on the organization.
+            </h2>
+          </div>
+          <div className="flex justify-center">
+            <Card className="w-full md:w-1/2 lg:w-1/3">
+              <form onSubmit={handleSubmit}>
                 <fieldset onChange={handleOrganizationInputChange}>
                   <Label htmlFor="name">Name</Label>
                   <TextInput
@@ -248,172 +253,170 @@ const App: React.FC = () => {
                     value={organization.newShareClass}
                   />
                 </fieldset>
-                <div className="flex gap-2 my-2 justify-end" role="group">
-                  <Button
-                    size="sm"
-                    color="gray"
-                    onClick={() => props.tabsRef.current?.setActiveTab(1)}
-                  >
-                    <p>Next</p>
-                    <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          </Tabs.Item>
+              </form>
+              <div className="flex gap-2 my-2 justify-end" role="group">
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => props.tabsRef.current?.setActiveTab(1)}
+                >
+                  <p>Next</p>
+                  <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </Tabs.Item>
 
-          <Tabs.Item icon={TbStack3} title="Share Classes">
-            <div className="flex justify-center">
-              <h2 className="text-2xl dark:text-white mb-8 font-thin">
-                How many shares have been issued?
-              </h2>
-            </div>
+        <Tabs.Item icon={TbStack3} title="Share Classes">
+          <div className="flex justify-center">
+            <h2 className="text-2xl dark:text-white mb-8 font-thin">
+              How many shares have been issued?
+            </h2>
+          </div>
 
-            <div className="flex justify-center">
-              <Card className="w-full md:w-2/3 lg:w-1/2">
-                <ShareClassList
-                  handler={handleShareClassInputChange}
-                  organization={organization}
-                />
-                <div className="flex gap-2 my-2 justify-end" role="group">
-                  <Button
-                    size="sm"
-                    color="gray"
-                    onClick={() => props.tabsRef.current?.setActiveTab(0)}
-                  >
-                    <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
-                    <p>Back</p>
-                  </Button>
-                  <Button
-                    size="sm"
-                    color="gray"
-                    onClick={() => props.tabsRef.current?.setActiveTab(2)}
-                  >
-                    <p>Next</p>
-                    <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          </Tabs.Item>
+          <div className="flex justify-center">
+            <Card className="w-full md:w-2/3 lg:w-1/2">
+              <ShareClassList
+                handler={handleShareClassInputChange}
+                organization={organization}
+              />
+              <div className="flex gap-2 my-2 justify-end" role="group">
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => props.tabsRef.current?.setActiveTab(0)}
+                >
+                  <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
+                  <p>Back</p>
+                </Button>
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => props.tabsRef.current?.setActiveTab(2)}
+                >
+                  <p>Next</p>
+                  <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </Tabs.Item>
 
-          <Tabs.Item icon={TbFileDollar} title="Convertible Notes">
-            <div className="flex justify-center">
-              <h2 className="text-2xl dark:text-white mb-8 font-thin">
-                What convertible notes are outstanding?
-              </h2>
-            </div>
+        <Tabs.Item icon={TbFileDollar} title="Convertible Notes">
+          <div className="flex justify-center">
+            <h2 className="text-2xl dark:text-white mb-8 font-thin">
+              What convertible notes are outstanding?
+            </h2>
+          </div>
 
-            <div className="flex justify-center">
-              <Card className="w-full md:w-3/4 lg:w-1/2">
-                <ConvertibleNotesList handler={setOrganizationProperty} />
-                <div className="flex gap-2 my-2 justify-end" role="group">
-                  <Button
-                    size="sm"
-                    color="gray"
-                    onClick={() => props.tabsRef.current?.setActiveTab(1)}
-                  >
-                    <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
-                    <p>Back</p>
-                  </Button>
-                  <Button
-                    size="sm"
-                    color="gray"
-                    onClick={() => props.tabsRef.current?.setActiveTab(3)}
-                  >
-                    <p>Next</p>
-                    <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          </Tabs.Item>
+          <div className="flex justify-center">
+            <Card className="w-full md:w-3/4 lg:w-1/2">
+              <ConvertibleNotesList handler={handleNotesFieldsChange} />
+              <div className="flex gap-2 my-2 justify-end" role="group">
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => props.tabsRef.current?.setActiveTab(1)}
+                >
+                  <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
+                  <p>Back</p>
+                </Button>
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => props.tabsRef.current?.setActiveTab(3)}
+                >
+                  <p>Next</p>
+                  <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </Tabs.Item>
 
-          <Tabs.Item icon={TbColumns3} title="Investment Scenarios">
-            <div className="flex justify-center">
-              <h2 className="text-2xl dark:text-white mb-8 font-thin">
-                What investment scenarios are on the table?
-              </h2>
-            </div>
+        <Tabs.Item icon={TbColumns3} title="Investment Scenarios">
+          <div className="flex justify-center">
+            <h2 className="text-2xl dark:text-white mb-8 font-thin">
+              What investment scenarios are on the table?
+            </h2>
+          </div>
 
-            <div className="flex justify-center">
-              <Card className="w-full lg:w-3/4 min-w-fit">
-                <fieldset>
-                  <ScenarioComparisonTable
-                    scenarios={scenarios}
-                    handleTabChange={handleTabChange}
-                    handleActiveScenarioChange={handleActiveScenarioChange}
-                  />
-                </fieldset>
-                <div className="flex gap-2 my-2 justify-end" role="group">
-                  <Button
-                    size="sm"
-                    color="gray"
-                    onClick={() => props.tabsRef.current?.setActiveTab(2)}
-                  >
-                    <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
-                    <p>Back</p>
-                  </Button>
-                  <Button
-                    size="sm"
-                    color="gray"
-                    onClick={() => props.tabsRef.current?.setActiveTab(4)}
-                  >
-                    <p>Next</p>
-                    <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          </Tabs.Item>
-          <Tabs.Item icon={TbTable} title="Cap Table">
-            <div className="flex justify-center gap-2">
-              <h2 className="text-2xl dark:text-white mb-8 font-thin">
-                Dig into the detailed Pro Forma Cap Table for
-              </h2>
-              <Select
-                id="Scenario"
-                sizing="sm"
-                className=""
-                defaultValue={activeScenario}
-                onChange={handleActiveScenarioInputChange}
-              >
-                {scenarios.map((capTable, index) => (
-                  <option
-                    value={index}
-                    key={index}
-                    selected={index === activeScenario}
-                  >
-                    {capTable.organization.description}:{" "}
-                    {prettyUSD(capTable.organization.newMoneyRaised)} @{" "}
-                    {prettyUSD(capTable.organization.preMoneyValuation)}
-                  </option>
-                ))}
-              </Select>
-            </div>
+          <div className="flex justify-center">
+            <Card className="w-full lg:w-3/4 min-w-fit">
+              <ScenarioComparisonTable
+                scenarios={scenarios}
+                handleTabChange={handleTabChange}
+                handleActiveScenarioChange={handleActiveScenarioChange}
+              />
+              <div className="flex gap-2 my-2 justify-end" role="group">
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => props.tabsRef.current?.setActiveTab(2)}
+                >
+                  <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
+                  <p>Back</p>
+                </Button>
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => props.tabsRef.current?.setActiveTab(4)}
+                >
+                  <p>Next</p>
+                  <TbSquareRoundedArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </Tabs.Item>
+        <Tabs.Item icon={TbTable} title="Cap Table">
+          <div className="flex justify-center gap-2">
+            <h2 className="text-2xl dark:text-white mb-8 font-thin">
+              Dig into the detailed Pro Forma Cap Table for
+            </h2>
+            <Select
+              id="Scenario"
+              sizing="sm"
+              className=""
+              defaultValue={activeScenario}
+              onChange={handleActiveScenarioInputChange}
+            >
+              {scenarios.map((capTable, index) => (
+                <option
+                  value={index}
+                  key={index}
+                  selected={index === activeScenario}
+                >
+                  {capTable.organization.description}:{" "}
+                  {prettyUSD(capTable.organization.newMoneyRaised)} @{" "}
+                  {prettyUSD(capTable.organization.preMoneyValuation)}
+                </option>
+              ))}
+            </Select>
+          </div>
 
-            <div className="flex justify-center">
-              <Card className="w-full lg:w-3/4 min-w-fit">
-                <ProFormaCapTable capTable={scenarios[activeScenario]} />
-                <div className="flex gap-2 my-2 justify-end" role="group">
-                  <Button
-                    size="sm"
-                    color="gray"
-                    onClick={() => props.tabsRef.current?.setActiveTab(3)}
-                  >
-                    <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
-                    <p>Back</p>
-                  </Button>
-                  <Button size="sm" color="gray">
-                    <TbDownload className="mr-2 h-5 w-5" />
-                    <p>Export</p>
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          </Tabs.Item>
-        </Tabs.Group>
-      </form>
+          <div className="flex justify-center">
+            <Card className="w-full lg:w-3/4 min-w-fit">
+              <ProFormaCapTable capTable={scenarios[activeScenario]} />
+              <div className="flex gap-2 my-2 justify-end" role="group">
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => props.tabsRef.current?.setActiveTab(3)}
+                >
+                  <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
+                  <p>Back</p>
+                </Button>
+                <Button size="sm" color="gray">
+                  <TbDownload className="mr-2 h-5 w-5" />
+                  <p>Export</p>
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </Tabs.Item>
+      </Tabs.Group>
     </div>
   );
 };

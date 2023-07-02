@@ -58,7 +58,7 @@ const ShareClassList: React.FC<AppProps> = (props: AppProps) => {
   };
 
   return (
-    <div>
+    <form>
       <fieldset>
         <Table className="text-right">
           <Table.Head>
@@ -92,7 +92,7 @@ const ShareClassList: React.FC<AppProps> = (props: AppProps) => {
           </Table.Body>
         </Table>
       </fieldset>
-    </div>
+    </form>
   );
 };
 

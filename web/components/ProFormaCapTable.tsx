@@ -7,12 +7,16 @@ type AppProps = {
   capTable: CapTable;
 };
 const ProFormaCapTable: React.FC<AppProps> = (props: AppProps) => {
+  const omitInfinity = (value: string) => {
+    if (value.includes("∞")) return "";
+    return value;
+  };
   return (
     <Table hoverable className="font-mono ">
       <Table.Head className="text-center">
         <Table.HeadCell className="text-left text-base">
-          {props.capTable.organization.name}
-          {props.capTable.organization.newShareClass}
+          <p>{props.capTable.organization.name}</p>
+          <p>{props.capTable.organization.newShareClass}</p>
         </Table.HeadCell>
         <Table.HeadCell colSpan={3} className="text-base">
           Pre-Money
@@ -107,10 +111,12 @@ const ProFormaCapTable: React.FC<AppProps> = (props: AppProps) => {
               )}
             </Table.Cell>
             <Table.Cell>
-              {prettyPercent(
-                shareClass.postMoneyDilution(
-                  props.capTable.totalPostMoneyShares(),
-                  props.capTable.totalPreMoneyShares()
+              {omitInfinity(
+                prettyPercent(
+                  shareClass.postMoneyDilution(
+                    props.capTable.totalPostMoneyShares(),
+                    props.capTable.totalPreMoneyShares()
+                  )
                 )
               )}
             </Table.Cell>
