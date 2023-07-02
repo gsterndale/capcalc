@@ -12,7 +12,7 @@ const ProFormaCapTable: React.FC<AppProps> = (props: AppProps) => {
     return value;
   };
   return (
-    <Table hoverable className="font-mono ">
+    <Table hoverable className="font-mono" id="proFormaCapTable">
       <Table.Head className="text-center">
         <Table.HeadCell className="text-left text-base">
           <p>{props.capTable.organization.name}</p>

@@ -19,6 +19,7 @@ import {
   Accordion,
 } from "flowbite-react";
 import {
+  TbCopy,
   TbArrowRight,
   TbSquareRoundedArrowRight,
   TbSquareRoundedArrowLeft,
@@ -130,6 +131,17 @@ const App: React.FC = () => {
 
   const handleTabChange = (index: number) => {
     props.tabsRef.current?.setActiveTab(index);
+  };
+
+  const handleCopy = (selector: string) => {
+    const node = document.querySelector(selector);
+    if (node === null) return;
+    const blob = new Blob([node.outerHTML], { type: "text/html" });
+    let data = [new ClipboardItem({ [blob.type]: blob })];
+    navigator.clipboard.write(data).then(
+      () => console.log("Copied"),
+      (err) => console.log("Error while copying")
+    );
   };
 
   const handleShareClassInputChange = (shareClass: {
@@ -361,6 +373,14 @@ const App: React.FC = () => {
                 <Button
                   size="sm"
                   color="gray"
+                  onClick={() => handleCopy("#scenarioComparisonTable")}
+                >
+                  <TbCopy className="mr-2 h-5 w-5" />
+                  <p>Copy</p>
+                </Button>
+                <Button
+                  size="sm"
+                  color="gray"
                   onClick={() => props.tabsRef.current?.setActiveTab(4)}
                 >
                   <p>Next</p>
@@ -408,9 +428,13 @@ const App: React.FC = () => {
                   <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
                   <p>Back</p>
                 </Button>
-                <Button size="sm" color="gray">
-                  <TbDownload className="mr-2 h-5 w-5" />
-                  <p>Export</p>
+                <Button
+                  size="sm"
+                  color="gray"
+                  onClick={() => handleCopy("#proFormaCapTable")}
+                >
+                  <TbCopy className="mr-2 h-5 w-5" />
+                  <p>Copy</p>
                 </Button>
               </div>
             </Card>

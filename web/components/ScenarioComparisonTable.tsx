@@ -141,7 +141,7 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
   return (
     <form>
       <fieldset>
-        <Table className="font-mono text-right">
+        <Table className="font-mono text-right" id="scenarioComparisonTable">
           <Table.Head>
             <Table.HeadCell colSpan={2} className="text-right">
               Scenario
