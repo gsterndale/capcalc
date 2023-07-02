@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, TextInput, Checkbox, Table, Select } from "flowbite-react";
 import {
   TbArrowRight,
@@ -14,8 +14,6 @@ import {
   TbColumnInsertRight,
   TbCurrencyDollar,
   TbPercentage,
-  TbLetterK,
-  TbLetterM,
   TbSquareRoundedLetterA,
   TbSquareRoundedLetterB,
   TbSquareRoundedLetterC,
@@ -28,74 +26,184 @@ import {
   TbLayoutRows,
   TbStack3,
 } from "react-icons/tb";
+import { CapTable, ShareClass, type Organization } from "@capcalc/calc";
+import { prettyPercent, prettyShares, prettyUSD } from "@capcalc/utils";
 
-const ScenarioComparisonTable: React.FC = () => {
+type scenarioColumn = {
+  key: number;
+  letter: string;
+
+  description: string;
+  preMoneyValuation: number;
+  newMoneyRaised: number;
+  noteConversion: boolean;
+  notesConvertToNewClass: boolean;
+  expandOptionPool: boolean;
+  postMoneyOptionPoolSize: number;
+
+  preMoneySharePrice: number;
+  preMoneyShares: number;
+  postMoneyShares: number;
+  preMoneyPercentOwnership: number;
+  preMoneyOwnershipValue: number;
+
+  postMoneySharePrice: number;
+  postMoneyPercentOwnership: number;
+  postMoneyOwnershipValue: number;
+  postMoneyPercentChange: number;
+  postMoneyValueChange: number;
+  postMoneyDilution: number;
+};
+
+type AppProps = {
+  scenarios: CapTable[];
+};
+const initialShareClassName = "Founders' Shares";
+
+const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
+  const alpha = Array.from(Array(26)).map((e, i) => i + 65);
+  const alphabet = alpha.map((x) => String.fromCharCode(x));
+  const checkmark = (bool: Boolean) => {
+    if (!bool) return "";
+    return <TbCheck className="inline-flex" />;
+  };
+
+  const [shareClassName, setShareClassName] = useState<string>(
+    initialShareClassName
+  );
+  const handleShareClassNameInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value, type, checked } = event.target;
+    setShareClassName((prevState) => value);
+  };
+
+  const scenarioColumns: scenarioColumn[] = props.scenarios.map(
+    (capTable: CapTable, index) => {
+      const shareClass = capTable
+        .shareClasses()
+        .find((obj) => obj.name === shareClassName);
+      if (shareClass === undefined)
+        throw new Error(`ShareClass named ${shareClassName} not found.`);
+
+      return {
+        key: index,
+        letter: alphabet[index],
+
+        description: `Ideal`,
+        preMoneyValuation: capTable.organization.preMoneyValuation,
+        newMoneyRaised: capTable.organization.newMoneyRaised,
+        noteConversion: true,
+        notesConvertToNewClass: true,
+        expandOptionPool: true,
+        postMoneyOptionPoolSize: 1,
+
+        preMoneySharePrice: capTable.preMoneySharePrice(),
+        preMoneyShares: shareClass.preMoneyShares,
+        preMoneyPercentOwnership: shareClass.preMoneyPercentOwnership(
+          capTable.totalPreMoneyShares()
+        ),
+        preMoneyOwnershipValue: shareClass.preMoneyOwnershipValue(
+          capTable.preMoneySharePrice()
+        ),
+
+        postMoneyShares: shareClass.postMoneyShares,
+        postMoneySharePrice: capTable.sharePriceForFinancing(),
+        postMoneyPercentOwnership: shareClass.postMoneyPercentOwnership(
+          capTable.totalPostMoneyShares()
+        ),
+        postMoneyOwnershipValue: shareClass.postMoneyOwnershipValue(
+          capTable.sharePriceForFinancing()
+        ),
+        postMoneyPercentChange: shareClass.postMoneyPercentChange(
+          capTable.totalPostMoneyShares(),
+          capTable.totalPreMoneyShares()
+        ),
+        postMoneyValueChange: shareClass.postMoneyValueChange(
+          capTable.sharePriceForFinancing(),
+          capTable.preMoneySharePrice()
+        ),
+        postMoneyDilution: shareClass.postMoneyDilution(
+          capTable.totalPostMoneyShares(),
+          capTable.totalPreMoneyShares()
+        ),
+      };
+    }
+  );
+
   return (
-    <Table>
+    <Table className="font-mono text-right">
       <Table.Head>
         <Table.HeadCell colSpan={2} className="text-right">
           Scenario
         </Table.HeadCell>
+        {scenarioColumns.map((col) => (
+          <Table.HeadCell key={col.key}>
+            <a href="#" className="inline-flex">
+              {col.letter}
+            </a>
+          </Table.HeadCell>
+        ))}
         <Table.HeadCell>
-          <a href="#" className="inline-flex items-center justify-center gap-1">
-            <TbSquareRoundedLetterA className="h-6 w-6" title="A" />
-          </a>
-        </Table.HeadCell>
-        <Table.HeadCell>
-          <a href="#" className="inline-flex items-center justify-center gap-1">
-            <TbSquareRoundedLetterB className="h-6 w-6" title="B" />
-          </a>
-        </Table.HeadCell>
-        <Table.HeadCell>
-          <a href="#" className="inline-flex items-center justify-center gap-1">
-            <TbSquareRoundedLetterC className="h-6 w-6" title="C" />
-          </a>
-        </Table.HeadCell>
-        <Table.HeadCell>
-          <a href="#" className="inline-flex items-center justify-center gap-1">
-            <TbSquareRoundedLetterD className="h-6 w-6" title="D" />
+          <a href="#" className="inline-flex">
+            {alphabet[props.scenarios.length]}
           </a>
         </Table.HeadCell>
       </Table.Head>
       <Table.Body>
         <Table.Row>
-          <Table.Cell rowSpan={7}>Deal mechanics</Table.Cell>
+          <Table.Cell rowSpan={8} className="text-left">
+            Deal mechanics
+          </Table.Cell>
         </Table.Row>
         <Table.Row>
-          <Table.Cell>New Money Raised</Table.Cell>
-          <Table.Cell>$10M</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">$12M</Table.Cell>
-          <Table.Cell>$12M</Table.Cell>
+          <Table.Cell className="text-left">Description</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>{col.description}</Table.Cell>
+          ))}
+          <Table.Cell className="w-44">
+            <TextInput sizing="sm" name="description" />
+          </Table.Cell>
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell className="text-left">New Money Raised</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>{prettyUSD(col.newMoneyRaised)}</Table.Cell>
+          ))}
           <Table.Cell className="w-44">
             <TextInput
               sizing="sm"
               type="number"
               name="newMoneyRaised"
               icon={TbCurrencyDollar}
-              rightIcon={TbLetterM}
             />
           </Table.Cell>
         </Table.Row>
         <Table.Row>
-          <Table.Cell>Pre-Money Valuation</Table.Cell>
-          <Table.Cell>$30M</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">$28M</Table.Cell>
-          <Table.Cell>$30M</Table.Cell>
+          <Table.Cell className="text-left">Pre-Money Valuation</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyUSD(col.preMoneyValuation)}
+            </Table.Cell>
+          ))}
           <Table.Cell>
             <TextInput
               sizing="sm"
               type="number"
               name="preMoneyValuation"
               icon={TbCurrencyDollar}
-              rightIcon={TbLetterM}
             />
           </Table.Cell>
         </Table.Row>
         <Table.Row>
-          <Table.Cell>Post-Money Option Pool Size</Table.Cell>
-          <Table.Cell>20%</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">25%</Table.Cell>
-          <Table.Cell>20%</Table.Cell>
+          <Table.Cell className="text-left">
+            Post-Money Option Pool Size
+          </Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyPercent(col.postMoneyOptionPoolSize, 0)}
+            </Table.Cell>
+          ))}
           <Table.Cell>
             <TextInput
               sizing="sm"
@@ -106,25 +214,23 @@ const ScenarioComparisonTable: React.FC = () => {
           </Table.Cell>
         </Table.Row>
         <Table.Row>
-          <Table.Cell>Notes Convert</Table.Cell>
-          <Table.Cell>
-            <TbCheck />
-          </Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
-            <TbCheck />
-          </Table.Cell>
-          <Table.Cell></Table.Cell>
+          <Table.Cell className="text-left">Notes Convert</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>{checkmark(col.noteConversion)}</Table.Cell>
+          ))}
           <Table.Cell>
             <Checkbox name="noteConversion" id="noteConversion" />
           </Table.Cell>
         </Table.Row>
         <Table.Row>
-          <Table.Cell>Notes Convert to New Class</Table.Cell>
-          <Table.Cell>
-            <TbCheck />
+          <Table.Cell className="text-left">
+            Notes Convert to New Class
           </Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800"></Table.Cell>
-          <Table.Cell></Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {checkmark(col.notesConvertToNewClass)}
+            </Table.Cell>
+          ))}
           <Table.Cell>
             <Checkbox
               name="notesConvertToNewClass"
@@ -133,16 +239,12 @@ const ScenarioComparisonTable: React.FC = () => {
           </Table.Cell>
         </Table.Row>
         <Table.Row>
-          <Table.Cell>Expand Option Pool</Table.Cell>
-          <Table.Cell>
-            <TbCheck />
-          </Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
-            <TbCheck />
-          </Table.Cell>
-          <Table.Cell>
-            <TbCheck />
-          </Table.Cell>
+          <Table.Cell className="text-left">Expand Option Pool</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {checkmark(col.expandOptionPool)}
+            </Table.Cell>
+          ))}
           <Table.Cell>
             <Checkbox name="expandOptionPool" id="expandOptionPool" />
           </Table.Cell>
@@ -157,7 +259,7 @@ const ScenarioComparisonTable: React.FC = () => {
               </Button>
             </div>
           </Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
+          <Table.Cell>
             <div className="inline-flex" role="group">
               <Button size="xs" color="gray">
                 <TbPencil className="mr-2 h-4 w-4" />
@@ -190,15 +292,17 @@ const ScenarioComparisonTable: React.FC = () => {
                 id="ShareClass"
                 sizing="sm"
                 className="display-inline w-auto"
+                defaultValue={0}
+                onChange={handleShareClassNameInputChange}
               >
-                <option selected>Founders</option>
-                <option>Common</option>
+                <option>Founders' Shares</option>
+                <option>Rest of Common</option>
                 <option>Warrants</option>
-                <option>Notes</option>
-                <option>New Money</option>
-                <option>Grants</option>
-                <option>Old Pool</option>
-                <option>New Pool</option>
+                <option>Convertible Notes Into New Share Class</option>
+                <option>New Money Equity</option>
+                <option>Granted Options</option>
+                <option>Options Available before</option>
+                <option>New Options for Pool</option>
               </Select>
             </div>
             <div className="w-2/5 text-left">share class</div>
@@ -207,78 +311,104 @@ const ScenarioComparisonTable: React.FC = () => {
       </Table.Head>
       <Table.Body className="border-b">
         <Table.Row>
-          <Table.Cell rowSpan={4}>Pre-Money</Table.Cell>
-        </Table.Row>
-        <Table.Row>
-          <Table.Cell>Shares</Table.Cell>
-          <Table.Cell>8M</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">8M</Table.Cell>
-          <Table.Cell>8M</Table.Cell>
-        </Table.Row>
-        <Table.Row>
-          <Table.Cell>Ownership %</Table.Cell>
-          <Table.Cell>80%</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">80%</Table.Cell>
-          <Table.Cell>80%</Table.Cell>
-        </Table.Row>
-        <Table.Row>
-          <Table.Cell>Ownership Value at $3.00/Share</Table.Cell>
-          <Table.Cell>$24M</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
-            $22.2M
+          <Table.Cell rowSpan={5} className="text-left">
+            Pre-Money
           </Table.Cell>
-          <Table.Cell>$24M</Table.Cell>
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell className="text-left">Shares</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyShares(col.preMoneyShares)}
+            </Table.Cell>
+          ))}
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell className="text-left">Ownership %</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyPercent(col.preMoneyPercentOwnership)}
+            </Table.Cell>
+          ))}
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell className="text-left">Share Price</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyUSD(col.preMoneySharePrice, 2)}
+            </Table.Cell>
+          ))}
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell className="text-left">Ownership Value</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyUSD(col.preMoneyOwnershipValue)}
+            </Table.Cell>
+          ))}
         </Table.Row>
       </Table.Body>
       <Table.Body>
         <Table.Row>
-          <Table.Cell rowSpan={7}>Post-Money</Table.Cell>
-        </Table.Row>
-        <Table.Row>
-          <Table.Cell>Shares</Table.Cell>
-          <Table.Cell>8M</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">8M</Table.Cell>
-          <Table.Cell>8M</Table.Cell>
-        </Table.Row>
-        <Table.Row>
-          <Table.Cell>Ownership %</Table.Cell>
-          <Table.Cell>57.4%</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
-            52.9%
+          <Table.Cell rowSpan={8} className="text-left">
+            Post-Money
           </Table.Cell>
-          <Table.Cell>55.4%</Table.Cell>
         </Table.Row>
         <Table.Row>
-          <Table.Cell>% Change</Table.Cell>
-          <Table.Cell>-22.6%</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
-            -27.1%
-          </Table.Cell>
-          <Table.Cell>-24.6%</Table.Cell>
+          <Table.Cell className="text-left">Shares</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyShares(col.postMoneyShares)}
+            </Table.Cell>
+          ))}
         </Table.Row>
         <Table.Row>
-          <Table.Cell>Ownership Value at $2.18/Share</Table.Cell>
-          <Table.Cell>$17.8M</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
-            $15.9M
-          </Table.Cell>
-          <Table.Cell>$18.2M</Table.Cell>
+          <Table.Cell className="text-left">Ownership %</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyPercent(col.postMoneyPercentOwnership)}
+            </Table.Cell>
+          ))}
         </Table.Row>
         <Table.Row>
-          <Table.Cell>Value Change</Table.Cell>
-          <Table.Cell>-$6.2M</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
-            -$6.3M
-          </Table.Cell>
-          <Table.Cell>$5.8M</Table.Cell>
+          <Table.Cell className="text-left">% Change</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyPercent(col.postMoneyPercentChange)}
+            </Table.Cell>
+          ))}
         </Table.Row>
         <Table.Row>
-          <Table.Cell>Dilution</Table.Cell>
-          <Table.Cell>-28.5%</Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
-            -33.9%
-          </Table.Cell>
-          <Table.Cell>-30.8%</Table.Cell>
+          <Table.Cell className="text-left">Share Price</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyUSD(col.postMoneySharePrice, 2)}
+            </Table.Cell>
+          ))}
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell className="text-left">Ownership Value</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyUSD(col.postMoneyOwnershipValue)}
+            </Table.Cell>
+          ))}
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell className="text-left">Value Change</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyUSD(col.postMoneyValueChange)}
+            </Table.Cell>
+          ))}
+        </Table.Row>
+        <Table.Row>
+          <Table.Cell className="text-left">Dilution</Table.Cell>
+          {scenarioColumns.map((col, index) => (
+            <Table.Cell key={index}>
+              {prettyPercent(col.postMoneyDilution)}
+            </Table.Cell>
+          ))}
         </Table.Row>
         <Table.Row>
           <Table.Cell colSpan={2}></Table.Cell>
@@ -292,7 +422,7 @@ const ScenarioComparisonTable: React.FC = () => {
               <p>Cap Table</p>
             </Button>
           </Table.Cell>
-          <Table.Cell className=" bg-gray-50 dark:bg-gray-800">
+          <Table.Cell>
             <Button
               size="xs"
               color="gray"

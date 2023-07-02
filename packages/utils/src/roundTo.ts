@@ -17,4 +17,24 @@ function asPercent(num: number) {
   return roundTo(num * 100, 1);
 }
 
-export { roundTo, asShares, asUSD, asPercent };
+function prettyUSD(num: number, decimals: number = 0) {
+  return `$${roundTo(num, decimals).toLocaleString("en-US")}`;
+}
+
+function prettyPercent(num: number, decimals: number = 1) {
+  return `${roundTo(num * 100, decimals).toLocaleString("en-US")}%`;
+}
+
+function prettyShares(num: number) {
+  return asShares(num).toLocaleString("en-US");
+}
+
+export {
+  roundTo,
+  asShares,
+  asUSD,
+  asPercent,
+  prettyUSD,
+  prettyPercent,
+  prettyShares,
+};

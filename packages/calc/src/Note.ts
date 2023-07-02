@@ -7,6 +7,7 @@ type NoteFields = {
   interestRate?: number;
   interestStartDate?: Date;
   conversionCap?: number;
+  name?: string;
 };
 
 interface Note extends NoteFields {
@@ -16,6 +17,7 @@ interface Note extends NoteFields {
   readonly interestRate?: number;
   readonly interestStartDate?: Date;
   readonly conversionCap?: number;
+  readonly name?: string;
 
   conversionAmount(): number;
   value(sharePriceForFinancing: number, preMoneyShares: number): number;
@@ -39,6 +41,7 @@ class ConvertibleNote implements Note {
   readonly conversionDate: Date = new Date();
   readonly interestRate: number = 0;
   readonly interestStartDate: Date = new Date();
+  readonly name: string = "";
 
   constructor(attrs: NoteFields) {
     this.principalInvested = attrs.principalInvested;
@@ -49,6 +52,7 @@ class ConvertibleNote implements Note {
       this.interestRate = attrs.interestRate;
     if (attrs.interestStartDate !== undefined)
       this.interestStartDate = attrs.interestStartDate;
+    if (attrs.name !== undefined) this.name = attrs.name;
   }
 
   conversionAmount() {

@@ -1,6 +1,10 @@
 import React, { useState, useRef, FormEvent } from "react";
+import { CapTable, Organization, NoteFields } from "@capcalc/calc";
+import ShareClassList from "../components/ShareClassList";
+import ConvertibleNotesList from "../components/ConvertibleNotesList";
 import ProFormaCapTable from "../components/ProFormaCapTable";
 import ScenarioComparisonTable from "../components/ScenarioComparisonTable";
+import parseInput from "../common/parseInput";
 import {
   Button,
   Tabs,
@@ -36,6 +40,8 @@ import {
   TbSquareRoundedLetterD,
   TbCoin,
   TbFileDollar,
+  TbFileSpreadsheet,
+  TbDownload,
   TbArrowFork,
   TbGitFork,
   TbBusinessplan,
@@ -43,10 +49,111 @@ import {
   TbStack3,
 } from "react-icons/tb";
 
-const Playground: React.FC = () => {
+const initialOrganizationState: Organization = {
+  notesFields: [
+    {
+      principalInvested: 200000,
+      interestRate: 0.0,
+      interestStartDate: new Date(2015, 1, 15),
+      conversionCap: 3500000,
+      conversionDiscount: 0.2,
+      conversionDate: new Date(2023, 4, 15),
+    },
+    {
+      principalInvested: 200000,
+      interestRate: 0.0,
+      interestStartDate: new Date(2015, 0, 3),
+      conversionCap: 5500000,
+      conversionDiscount: 0.1,
+      conversionDate: new Date(2023, 4, 15),
+    },
+    {
+      principalInvested: 200000,
+      interestRate: 0.06,
+      interestStartDate: new Date(2020, 10, 10),
+      conversionCap: 8000000,
+      conversionDiscount: 0.1,
+      conversionDate: new Date(2023, 4, 15),
+    },
+    {
+      principalInvested: 200000,
+      interestRate: 0.06,
+      interestStartDate: new Date(2015, 0, 3),
+      conversionCap: 10000000,
+      conversionDiscount: 0.2,
+      conversionDate: new Date(2023, 4, 15),
+    },
+  ],
+
+  newShareClass: "Series A",
+  preMoneyValuation: 30000000,
+  newMoneyRaised: 1000000,
+  noteConversion: true,
+  notesConvertToNewClass: true,
+  expandOptionPool: true,
+  postMoneyOptionPoolSize: 0.2,
+  foundersNumberOfShares: 8000000,
+  commonNumberOfShares: 1000000,
+  warrantsNumberOfShares: 100000,
+  grantedOptionsNumberOfShares: 800000,
+  oldOptionsNumberOfShares: 100000,
+};
+
+const initialScenariosState: CapTable[] = [
+  new CapTable(initialOrganizationState),
+  new CapTable(initialOrganizationState),
+  new CapTable(initialOrganizationState),
+];
+const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [organization, setOrganization] = useState<Organization>(
+    initialOrganizationState
+  );
+  const [scenarios, setScenarios] = useState<Array<CapTable>>(
+    initialScenariosState
+  );
   const tabsRef = useRef<TabsRef>(null);
   const props = { setActiveTab, tabsRef };
+
+  const handleShareClassInputChange = (shareClass: {
+    key: string;
+    shares: number;
+  }) => {
+    const name = `${shareClass.key}NumberOfShares`;
+    setOrganizationProperty(name, shareClass.shares);
+  };
+
+  const setOrganizationProperty = (name: string, value: any) => {
+    // only if name is in common Organization props
+    console.log({ orgChange: { name, value, organization } });
+
+    setOrganization((prevOrganization) => {
+      const newOrganization = {
+        ...prevOrganization,
+        [name]: value,
+      };
+
+      setScenarios((prevScenarios) =>
+        prevScenarios.map((capTable) => new CapTable(newOrganization))
+      );
+
+      return newOrganization;
+    });
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  };
+
+  const handleOrganizationInputChange = (
+    //React.FormEventHandler<HTMLFieldSetElement>
+    event: React.FormEvent<HTMLFormElement> //React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type, checked } = event.target;
+    const inputValue = parseInput(value, type, checked);
+
+    setOrganizationProperty(name, inputValue);
+  };
 
   return (
     <div className="mx-5 my-5">
@@ -67,7 +174,7 @@ const Playground: React.FC = () => {
         </p>
       </div>
 
-      <form>
+      <form onSubmit={handleSubmit}>
         <Tabs.Group
           aria-label="Tabs"
           style="underline"
@@ -83,7 +190,7 @@ const Playground: React.FC = () => {
             </div>
             <div className="flex justify-center">
               <Card className="w-full md:w-1/2 lg:w-1/3">
-                <fieldset>
+                <fieldset onChange={handleOrganizationInputChange}>
                   <Label htmlFor="name">Name</Label>
                   <TextInput
                     name="name"
@@ -95,6 +202,7 @@ const Playground: React.FC = () => {
                     name="newShareClass"
                     sizing="sm"
                     placeholder="Series A"
+                    value={organization.newShareClass}
                   />
                 </fieldset>
                 <div className="flex gap-2 my-2 justify-end" role="group">
@@ -119,81 +227,11 @@ const Playground: React.FC = () => {
             </div>
 
             <div className="flex justify-center">
-              <Card className="w-full md:w-1/2 lg:w-1/3">
-                <fieldset>
-                  <Table>
-                    <Table.Head>
-                      <Table.HeadCell className="py-1 px-4">
-                        Share Class
-                      </Table.HeadCell>
-                      <Table.HeadCell className="py-1 px-4">
-                        Shares
-                      </Table.HeadCell>
-                    </Table.Head>
-                    <Table.Body>
-                      <Table.Row>
-                        <Table.Cell className="py-1 px-4">
-                          <Label>Founders:</Label>
-                        </Table.Cell>
-                        <Table.Cell className="py-1 px-4">
-                          <TextInput
-                            type="number"
-                            sizing="sm"
-                            name="foundersNumberOfShares"
-                          />
-                        </Table.Cell>
-                      </Table.Row>
-                      <Table.Row>
-                        <Table.Cell className="py-1 px-4">
-                          <Label>Common:</Label>
-                        </Table.Cell>
-                        <Table.Cell className="py-1 px-4">
-                          <TextInput
-                            type="number"
-                            sizing="sm"
-                            name="commonNumberOfShares"
-                          />
-                        </Table.Cell>
-                      </Table.Row>
-                      <Table.Row>
-                        <Table.Cell className="py-1 px-4">
-                          <Label>Warrants:</Label>
-                        </Table.Cell>
-                        <Table.Cell className="py-1 px-4">
-                          <TextInput
-                            type="number"
-                            sizing="sm"
-                            name="warrantsNumberOfShares"
-                          />
-                        </Table.Cell>
-                      </Table.Row>
-                      <Table.Row>
-                        <Table.Cell className="py-1 px-4">
-                          <Label>Granted Options:</Label>
-                        </Table.Cell>
-                        <Table.Cell className="py-1 px-4">
-                          <TextInput
-                            type="number"
-                            sizing="sm"
-                            name="grantedOptionsNumberOfShares"
-                          />
-                        </Table.Cell>
-                      </Table.Row>
-                      <Table.Row>
-                        <Table.Cell className="py-1 px-4">
-                          <Label>Old Options:</Label>
-                        </Table.Cell>
-                        <Table.Cell className="py-1 px-4">
-                          <TextInput
-                            type="number"
-                            sizing="sm"
-                            name="oldOptionsNumberOfShares"
-                          />
-                        </Table.Cell>
-                      </Table.Row>
-                    </Table.Body>
-                  </Table>
-                </fieldset>
+              <Card className="w-full md:w-2/3 lg:w-1/2">
+                <ShareClassList
+                  handler={handleShareClassInputChange}
+                  organization={organization}
+                />
                 <div className="flex gap-2 my-2 justify-end" role="group">
                   <Button
                     size="sm"
@@ -225,133 +263,7 @@ const Playground: React.FC = () => {
 
             <div className="flex justify-center">
               <Card className="w-full md:w-3/4 lg:w-1/2">
-                <fieldset>
-                  <div className="flow-root">
-                    <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                      <li className="py-3 sm:py-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="min-w-0 flex-1 items-center text-base font-semibold text-gray-900 dark:text-white">
-                            Broad St Angels
-                          </div>
-                          <div className="">
-                            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
-                              $1.2M 20% $5M Cap
-                            </p>
-                            <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-                              Jun 13, 2020 6% APR
-                            </p>
-                          </div>
-                          <div className="">
-                            <Button size="xs" color="gray">
-                              <TbTrash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </li>
-
-                      <li className="py-3 sm:py-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="min-w-0 flex-1 items-center text-base font-semibold text-gray-900 dark:text-white">
-                            BFTP
-                          </div>
-                          <div className="">
-                            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
-                              $1.2M 20% $5M Cap
-                            </p>
-                            <p className="truncate text-sm text-gray-500 dark:text-gray-400"></p>
-                          </div>
-                          <div className="">
-                            <Button size="xs" color="gray">
-                              <TbTrash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </li>
-                      <li className="pb-0 pt-3 sm:pt-4 text-right">
-                        <Button size="xs" color="gray">
-                          <TbRowInsertBottom className="mr-2 h-5 w-5" />
-                          <p>Add Convertible Note</p>
-                        </Button>
-                      </li>
-                    </ul>
-                  </div>
-                </fieldset>
-
-                <fieldset>
-                  <legend>New Convertible Note</legend>
-                  <div className="grid gap-6 mb-6 md:grid-cols-3">
-                    <div className="flex flex-col gap-1">
-                      <div>
-                        <Label value="Name" />
-                        <TextInput sizing="sm" name="name" />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div>
-                        <Label value="Principal Invested" />
-                        <TextInput
-                          type="number"
-                          sizing="sm"
-                          name="principalInvested"
-                          icon={TbCurrencyDollar}
-                          rightIcon={TbLetterM}
-                        />
-                      </div>
-                      <div>
-                        <Label value="Conversion Discount" />
-                        <TextInput
-                          type="number"
-                          sizing="sm"
-                          name="conversionDiscount"
-                          rightIcon={TbPercentage}
-                        />
-                      </div>
-                      <div>
-                        <Label value="Conversion Cap" />
-                        <TextInput
-                          type="number"
-                          sizing="sm"
-                          name="conversionCap"
-                          icon={TbCurrencyDollar}
-                          rightIcon={TbLetterM}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div>
-                        <Label value="Interest Rate" />
-                        <TextInput
-                          type="number"
-                          sizing="sm"
-                          name="interestRate"
-                          rightIcon={TbPercentage}
-                        />
-                      </div>
-                      <div>
-                        <Label value="Interest Start Date" />
-                        <TextInput
-                          type="date"
-                          sizing="sm"
-                          name="interestStartDate"
-                        />
-                      </div>
-                      <div>
-                        <Label value="Conversion Date" />
-                        <TextInput
-                          type="date"
-                          sizing="sm"
-                          name="conversionDate"
-                        />
-                      </div>
-                      <div className="">
-                        <Button size="xs" color="gray">
-                          <TbRowInsertBottom className="mr-2 h-5 w-5" />
-                          <p>Save</p>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </fieldset>
+                <ConvertibleNotesList handler={setOrganizationProperty} />
                 <div className="flex gap-2 my-2 justify-end" role="group">
                   <Button
                     size="sm"
@@ -384,7 +296,7 @@ const Playground: React.FC = () => {
             <div className="flex justify-center">
               <Card className="w-full lg:w-3/4 min-w-fit">
                 <fieldset>
-                  <ScenarioComparisonTable />
+                  <ScenarioComparisonTable scenarios={scenarios} />
                 </fieldset>
                 <div className="flex gap-2 my-2 justify-end" role="group">
                   <Button
@@ -412,8 +324,8 @@ const Playground: React.FC = () => {
               <h2 className="text-2xl dark:text-white mb-8 font-thin">
                 Dig into the detailed Pro Forma Cap Table for
               </h2>
-              <Select id="Scenario" sizing="sm" className="">
-                <option selected>Scenario A: $10M @ $30M-PRE 20%ESOP</option>
+              <Select id="Scenario" sizing="sm" className="" defaultValue={0}>
+                <option>Scenario A: $10M @ $30M-PRE 20%ESOP</option>
                 <option>Scenario B: $12M @ $28M-PRE 25%ESOP</option>
                 <option>Scenario C: $12M @ $30M-PRE 20%ESOP</option>
               </Select>
@@ -431,6 +343,10 @@ const Playground: React.FC = () => {
                     <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
                     <p>Back</p>
                   </Button>
+                  <Button size="sm" color="gray">
+                    <TbDownload className="mr-2 h-5 w-5" />
+                    <p>Export</p>
+                  </Button>
                 </div>
               </Card>
             </div>
@@ -441,4 +357,4 @@ const Playground: React.FC = () => {
   );
 };
 
-export default Playground;
+export default App;
