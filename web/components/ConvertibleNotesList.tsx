@@ -114,6 +114,7 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
     let summary = [
       prettyUSD(note.principalInvested),
       prettyPercent(note.conversionDiscount),
+      "discount",
     ];
     if (note.conversionCap !== undefined)
       summary.push(` ${prettyUSD(note.conversionCap)} Cap`);
@@ -122,8 +123,14 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
 
   const detailNote = (note: NoteFields) => {
     let detail: string[] = [];
-    if (note.conversionDate !== undefined)
+    if (note.interestStartDate !== undefined) {
+      detail.push("starting");
+      detail.push(note.interestStartDate.toLocaleDateString());
+    }
+    if (note.conversionDate !== undefined) {
+      detail.push("converting");
       detail.push(note.conversionDate.toLocaleDateString());
+    }
     if (note.interestRate !== undefined)
       detail.push(`${prettyPercent(note.interestRate)} APR`);
     return detail.join(" ");
