@@ -465,7 +465,7 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
             <Table.Row>
               <Table.Cell colSpan={2}></Table.Cell>
               {scenarioColumns.map((col, index) => (
-                <Table.Cell>
+                <Table.Cell key={index}>
                   <Button
                     size="xs"
                     color="gray"

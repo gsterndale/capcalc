@@ -205,7 +205,7 @@ const App: React.FC = () => {
   };
 
   const handleOrganizationInputChange = (
-    event: React.FormEvent<HTMLFormElement> //React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value, type, checked } = event.target;
     const inputValue = parseInput(value, type, checked);
@@ -273,13 +273,14 @@ const App: React.FC = () => {
           <div className="flex justify-center">
             <Card className="w-full md:w-1/2 lg:w-1/3">
               <form onSubmit={handleSubmit}>
-                <fieldset onChange={handleOrganizationInputChange}>
+                <fieldset>
                   <Label htmlFor="name">Name</Label>
                   <TextInput
                     name="name"
                     sizing="sm"
                     placeholder="Pied Piper LLC"
                     value={organization.name}
+                    onChange={handleOrganizationInputChange}
                   />
                   <Label htmlFor="newShareClass">New Share Class</Label>
                   <TextInput
@@ -287,6 +288,7 @@ const App: React.FC = () => {
                     sizing="sm"
                     placeholder="Series A"
                     value={organization.newShareClass}
+                    onChange={handleOrganizationInputChange}
                   />
                 </fieldset>
               </form>
@@ -429,15 +431,11 @@ const App: React.FC = () => {
               id="Scenario"
               sizing="sm"
               className=""
-              defaultValue={activeScenario}
+              value={activeScenario}
               onChange={handleActiveScenarioInputChange}
             >
               {scenarios.map((capTable, index) => (
-                <option
-                  value={index}
-                  key={index}
-                  selected={index === activeScenario}
-                >
+                <option value={index} key={index}>
                   {capTable.organization.description}:{" "}
                   {prettyUSD(capTable.organization.newMoneyRaised)} @{" "}
                   {prettyUSD(capTable.organization.preMoneyValuation)}

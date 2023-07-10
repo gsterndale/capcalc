@@ -96,8 +96,8 @@ const ShareClassList: React.FC<AppProps> = (props: AppProps) => {
             <Table.HeadCell className="py-1 px-4">Ownership</Table.HeadCell>
           </Table.Head>
           <Table.Body className="text-right">
-            {shareClassRows.map((shareClassRow) => (
-              <Table.Row>
+            {shareClassRows.map((shareClassRow, index) => (
+              <Table.Row key={index}>
                 <Table.Cell className="py-1 px-4 text-left">
                   <Label>{shareClassRow.label}:</Label>
                 </Table.Cell>
