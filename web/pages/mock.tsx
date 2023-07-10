@@ -172,7 +172,6 @@ const App: React.FC = () => {
     ) as Pick<T, K>;
 
   const setOrganizationProperty = (name: string, value: any) => {
-    console.log({ orgChange: { name, value, organization } });
     setOrganization((prevOrganization) => {
       const newOrganization = {
         ...prevOrganization,
