@@ -12,6 +12,7 @@ import {
   TbRowInsertBottom,
   TbColumns3,
   TbColumnInsertRight,
+  TbColumnInsertLeft,
   TbCurrencyDollar,
   TbPercentage,
   TbSquareRoundedLetterA,
@@ -28,6 +29,7 @@ import {
 } from "react-icons/tb";
 import { CapTable, ShareClass, type Organization } from "@capcalc/calc";
 import { prettyPercent, prettyShares, prettyUSD } from "@capcalc/utils";
+import parseInput from "../common/parseInput";
 
 type scenarioColumn = {
   key: number;
@@ -59,6 +61,8 @@ type AppProps = {
   scenarios: CapTable[];
   handleTabChange: Function;
   handleActiveScenarioChange: Function;
+  handleAddScenario: Function;
+  handleRemoveScenario: Function;
 };
 const initialShareClassName = "Founders' Shares";
 
@@ -80,6 +84,41 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
     setShareClassName((prevState) => value);
   };
 
+  type InputValue = string | number | Date | boolean;
+  type FormEntry = [string, InputValue];
+  type HTMLFormControl =
+    | HTMLInputElement
+    | HTMLSelectElement
+    | HTMLTextAreaElement;
+
+  const handleAddScenarioSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const entries: FormEntry[] = Array.from(form.elements).reduce(
+      (memo, element) => {
+        const { name, value, type, checked } = element as HTMLFormControl;
+        let inputValue = parseInput(value, type, checked);
+        if (inputValue !== undefined && inputValue !== "" && name !== "") {
+          if (
+            ["postMoneyOptionPoolSize"].includes(name) &&
+            typeof inputValue == "number"
+          )
+            inputValue = inputValue / 100.0;
+          memo.push([name, inputValue]);
+        }
+        return memo;
+      },
+      [] as FormEntry[]
+    );
+    const orgPart = Object.fromEntries(entries) as Organization;
+    form.reset();
+    props.handleAddScenario(orgPart);
+  };
+
+  const handleRemoveScenario = (index: number) => {
+    props.handleRemoveScenario(index);
+  };
+
   const scenarioColumns: scenarioColumn[] = props.scenarios.map(
     (capTable: CapTable, index) => {
       const shareClass = capTable
@@ -95,10 +134,10 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
         description: capTable.organization.description,
         preMoneyValuation: capTable.organization.preMoneyValuation,
         newMoneyRaised: capTable.organization.newMoneyRaised,
-        noteConversion: true,
-        notesConvertToNewClass: true,
-        expandOptionPool: true,
-        postMoneyOptionPoolSize: 1,
+        noteConversion: capTable.organization.noteConversion,
+        notesConvertToNewClass: capTable.organization.notesConvertToNewClass,
+        expandOptionPool: capTable.organization.expandOptionPool,
+        postMoneyOptionPoolSize: capTable.organization.postMoneyOptionPoolSize,
 
         preMoneySharePrice: capTable.preMoneySharePrice(),
         preMoneyShares: shareClass.preMoneyShares,
@@ -139,7 +178,7 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
   };
 
   return (
-    <form>
+    <form onSubmit={handleAddScenarioSubmit}>
       <fieldset>
         <Table className="font-mono text-right" id="scenarioComparisonTable">
           <Table.Head>
@@ -171,7 +210,7 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
                 <Table.Cell key={index}>{col.description}</Table.Cell>
               ))}
               <Table.Cell className="w-44">
-                <TextInput sizing="sm" name="description" />
+                <TextInput sizing="sm" name="description" required={true} />
               </Table.Cell>
             </Table.Row>
             <Table.Row>
@@ -187,6 +226,8 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
                   type="number"
                   name="newMoneyRaised"
                   icon={TbCurrencyDollar}
+                  required={true}
+                  min={0}
                 />
               </Table.Cell>
             </Table.Row>
@@ -203,6 +244,8 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
                   type="number"
                   name="preMoneyValuation"
                   icon={TbCurrencyDollar}
+                  required={true}
+                  min={0}
                 />
               </Table.Cell>
             </Table.Row>
@@ -221,6 +264,8 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
                   type="number"
                   name="postMoneyOptionPoolSize"
                   rightIcon={TbPercentage}
+                  defaultValue={0}
+                  min={0}
                 />
               </Table.Cell>
             </Table.Row>
@@ -264,40 +309,32 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
             </Table.Row>
             <Table.Row>
               <Table.Cell colSpan={2}></Table.Cell>
+              {scenarioColumns.map((col, index) => (
+                <Table.Cell key={index}>
+                  <div className="inline-flex" role="group">
+                    <Button
+                      size="xs"
+                      color="gray"
+                      onClick={() => handleRemoveScenario(index)}
+                    >
+                      <TbTrash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Table.Cell>
+              ))}
               <Table.Cell>
-                <div className="inline-flex" role="group">
-                  <Button size="xs" color="gray">
-                    <TbPencil className="mr-2 h-4 w-4" />
-                    <p>Edit</p>
-                  </Button>
-                </div>
-              </Table.Cell>
-              <Table.Cell>
-                <div className="inline-flex" role="group">
-                  <Button size="xs" color="gray">
-                    <TbPencil className="mr-2 h-4 w-4" />
-                    <p>Edit</p>
-                  </Button>
-                </div>
-              </Table.Cell>
-              <Table.Cell>
-                <div className="inline-flex" role="group">
-                  <Button size="xs" color="gray">
-                    <TbPencil className="mr-2 h-4 w-4" />
-                    <p>Edit</p>
-                  </Button>
-                </div>
-              </Table.Cell>
-              <Table.Cell>
-                <Button size="xs" color="gray">
-                  <TbColumnInsertRight className="mr-2 h-5 w-5" />
+                <Button size="xs" color="gray" type="submit">
+                  <TbColumnInsertLeft className="mr-2 h-5 w-5" />
                   <p>Save</p>
                 </Button>
               </Table.Cell>
             </Table.Row>
           </Table.Body>
           <Table.Head>
-            <Table.HeadCell colSpan={6} className="text-center">
+            <Table.HeadCell
+              colSpan={scenarioColumns.length + 3}
+              className="text-center"
+            >
               <div className="flex items-center gap-1">
                 <div className="w-2/5 text-right">
                   Capitalization metrics for

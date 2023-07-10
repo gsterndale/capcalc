@@ -15,20 +15,45 @@ type ShareClassRow = {
   percent: number;
 };
 
-const inititalShareClassRows: ShareClassRow[] = [
-  { label: "Founders' Shares", key: "founders", percent: 0, shares: 0 },
-  { label: "Rest of Common", key: "common", percent: 0, shares: 0 },
-  { label: "Warrants", key: "warrants", percent: 0, shares: 0 },
-  { label: "Granted Options", key: "grantedOptions", percent: 0, shares: 0 },
-  {
-    label: "Options Available Before",
-    key: "oldOptions",
-    percent: 0,
-    shares: 0,
-  },
-];
-
 const ShareClassList: React.FC<AppProps> = (props: AppProps) => {
+  const initialSum =
+    props.organization.foundersNumberOfShares +
+    props.organization.commonNumberOfShares +
+    props.organization.warrantsNumberOfShares +
+    props.organization.grantedOptionsNumberOfShares +
+    props.organization.oldOptionsNumberOfShares;
+  const inititalShareClassRows: ShareClassRow[] = [
+    {
+      label: "Founders' Shares",
+      key: "founders",
+      shares: props.organization.foundersNumberOfShares,
+      percent: props.organization.foundersNumberOfShares / initialSum,
+    },
+    {
+      label: "Rest of Common",
+      key: "common",
+      shares: props.organization.commonNumberOfShares,
+      percent: props.organization.commonNumberOfShares / initialSum,
+    },
+    {
+      label: "Warrants",
+      key: "warrants",
+      shares: props.organization.warrantsNumberOfShares,
+      percent: props.organization.warrantsNumberOfShares / initialSum,
+    },
+    {
+      label: "Granted Options",
+      key: "grantedOptions",
+      shares: props.organization.grantedOptionsNumberOfShares,
+      percent: props.organization.grantedOptionsNumberOfShares / initialSum,
+    },
+    {
+      label: "Options Available Before",
+      key: "oldOptions",
+      shares: props.organization.oldOptionsNumberOfShares,
+      percent: props.organization.oldOptionsNumberOfShares / initialSum,
+    },
+  ];
   const [shareClassRows, setShareClassRows] = useState<Array<ShareClassRow>>(
     inititalShareClassRows
   );

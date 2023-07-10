@@ -43,7 +43,9 @@ import { NoteFields } from "@capcalc/calc";
 import { prettyPercent, prettyUSD } from "@capcalc/utils";
 
 type AppProps = {
-  handler: Function;
+  handleAddNoteFields: Function;
+  handleRemoveNoteFields: Function;
+  notesFields: NoteFields[];
 };
 const initialNotesFieldsState: NoteFields[] = [
   {
@@ -68,7 +70,7 @@ const pick = <T extends {}, K extends keyof T>(obj: T, ...keys: K[]) =>
 
 const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
   const [notesFields, setNotesFields] = useState<Array<NoteFields>>(
-    initialNotesFieldsState
+    props.notesFields
   );
 
   type InputValue = string | number | Date | boolean;
@@ -101,13 +103,15 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
     setNotesFields((prevState) => {
       return prevState.concat(noteFields);
     });
+    props.handleAddNoteFields(noteFields);
     form.reset();
-    props.handler(notesFields);
   };
 
   function handleRemoveNote(index: number): void {
-    notesFields.splice(index, 1);
-    props.handler(notesFields);
+    setNotesFields((prevNotesFields) => {
+      return prevNotesFields.filter((_, i) => i !== index);
+    });
+    props.handleRemoveNoteFields(index);
   }
 
   const summarizeNote = (note: NoteFields) => {

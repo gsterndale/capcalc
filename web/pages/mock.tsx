@@ -54,14 +54,16 @@ import { prettyShares, prettyUSD } from "@capcalc/utils";
 const initialOrganizationState: Organization = {
   notesFields: [
     {
+      name: "BFTP",
       principalInvested: 200000,
       interestRate: 0.0,
-      interestStartDate: new Date(2015, 1, 15),
+      interestStartDate: new Date(2015, 0, 2),
       conversionCap: 3500000,
       conversionDiscount: 0.2,
       conversionDate: new Date(2023, 4, 15),
     },
     {
+      name: "Broad St Angels",
       principalInvested: 200000,
       interestRate: 0.0,
       interestStartDate: new Date(2015, 0, 3),
@@ -70,6 +72,7 @@ const initialOrganizationState: Organization = {
       conversionDate: new Date(2023, 4, 15),
     },
     {
+      name: "Robin Hood Ventures",
       principalInvested: 200000,
       interestRate: 0.06,
       interestStartDate: new Date(2020, 10, 10),
@@ -78,6 +81,7 @@ const initialOrganizationState: Organization = {
       conversionDate: new Date(2023, 4, 15),
     },
     {
+      name: "Gabriel Investments",
       principalInvested: 200000,
       interestRate: 0.06,
       interestStartDate: new Date(2015, 0, 3),
@@ -152,7 +156,13 @@ const App: React.FC = () => {
     setOrganizationProperty(name, shareClass.shares);
   };
 
-  const handleNotesFieldsChange = (notesFields: NoteFields[]) => {
+  const handleAddNoteFields = (noteFields: NoteFields) => {
+    const notesFields = organization.notesFields.concat(noteFields);
+    setOrganizationProperty("notesFields", notesFields);
+  };
+
+  const handleRemoveNoteFields = (index: number) => {
+    const notesFields = organization.notesFields.filter((_, i) => i !== index);
     setOrganizationProperty("notesFields", notesFields);
   };
 
@@ -212,6 +222,20 @@ const App: React.FC = () => {
   };
   const handleActiveScenarioChange = (index: number) => {
     setActiveScenario(index);
+  };
+
+  const handleAddScenario = (orgPart: Organization) => {
+    const fullOrg: Organization = { ...organization, ...orgPart };
+    const newScenario: CapTable = new CapTable(fullOrg);
+    setScenarios((prevScenarios) => {
+      return prevScenarios.concat(newScenario);
+    });
+  };
+
+  const handleRemoveScenario = (index: number) => {
+    setScenarios((prevScenarios) => {
+      return prevScenarios.filter((_, i) => i !== index);
+    });
   };
 
   return (
@@ -324,7 +348,11 @@ const App: React.FC = () => {
 
           <div className="flex justify-center">
             <Card className="w-full md:w-3/4 lg:w-1/2">
-              <ConvertibleNotesList handler={handleNotesFieldsChange} />
+              <ConvertibleNotesList
+                notesFields={organization.notesFields}
+                handleAddNoteFields={handleAddNoteFields}
+                handleRemoveNoteFields={handleRemoveNoteFields}
+              />
               <div className="flex gap-2 my-2 justify-end" role="group">
                 <Button
                   size="sm"
@@ -360,6 +388,8 @@ const App: React.FC = () => {
                 scenarios={scenarios}
                 handleTabChange={handleTabChange}
                 handleActiveScenarioChange={handleActiveScenarioChange}
+                handleAddScenario={handleAddScenario}
+                handleRemoveScenario={handleRemoveScenario}
               />
               <div className="flex gap-2 my-2 justify-end" role="group">
                 <Button
