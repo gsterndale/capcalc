@@ -12,8 +12,10 @@ import {
   Card,
   Sidebar,
   Accordion,
+  Tooltip,
 } from "flowbite-react";
 import {
+  TbInfoCircle,
   TbArrowRight,
   TbSquareRoundedArrowRight,
   TbSquareRoundedArrowLeft,
@@ -196,13 +198,29 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
         <div className="grid gap-6 mb-6 md:grid-cols-3">
           <div className="flex flex-col gap-1">
             <div>
-              <Label value="Name" />
+              <Tooltip content="What is the name of the investor?">
+                <Label>
+                  Name
+                  <TbInfoCircle
+                    className="m-1"
+                    style={{ display: "inline", verticalAlign: "top" }}
+                  />
+                </Label>
+              </Tooltip>
               <TextInput sizing="sm" name="name" required={true} />
             </div>
           </div>
           <div className="flex flex-col gap-1">
             <div>
-              <Label value="Principal Invested" />
+              <Tooltip content="How much capital was invested?">
+                <Label>
+                  Principal Invested
+                  <TbInfoCircle
+                    className="m-1"
+                    style={{ display: "inline", verticalAlign: "top" }}
+                  />
+                </Label>
+              </Tooltip>
               <TextInput
                 type="number"
                 sizing="sm"
@@ -213,7 +231,15 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
               />
             </div>
             <div>
-              <Label value="Conversion Discount" />
+              <Tooltip content="What is the valuation discount this investor will receive relative to investors in this round?">
+                <Label>
+                  Conversion Discount
+                  <TbInfoCircle
+                    className="m-1"
+                    style={{ display: "inline", verticalAlign: "top" }}
+                  />
+                </Label>
+              </Tooltip>
               <TextInput
                 type="number"
                 sizing="sm"
@@ -224,7 +250,15 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
               />
             </div>
             <div>
-              <Label value="Conversion Cap" />
+              <Tooltip content="What is the maximum valuation at which this note will convert into equity?">
+                <Label>
+                  Conversion Cap
+                  <TbInfoCircle
+                    className="m-1"
+                    style={{ display: "inline", verticalAlign: "top" }}
+                  />
+                </Label>
+              </Tooltip>
               <TextInput
                 type="number"
                 sizing="sm"
@@ -236,7 +270,15 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
           </div>
           <div className="flex flex-col gap-1">
             <div>
-              <Label value="Interest Rate" />
+              <Tooltip content="What interest rate will be applied to the principal invested annually (if any)?">
+                <Label>
+                  Interest Rate
+                  <TbInfoCircle
+                    className="m-1"
+                    style={{ display: "inline", verticalAlign: "top" }}
+                  />
+                </Label>
+              </Tooltip>
               <TextInput
                 type="number"
                 sizing="sm"
@@ -247,11 +289,27 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
               />
             </div>
             <div>
-              <Label value="Interest Start Date" />
+              <Tooltip content="If it's being applied, when does interest start accruing?">
+                <Label>
+                  Interest Start Date
+                  <TbInfoCircle
+                    className="m-1"
+                    style={{ display: "inline", verticalAlign: "top" }}
+                  />
+                </Label>
+              </Tooltip>
               <TextInput type="date" sizing="sm" name="interestStartDate" />
             </div>
             <div>
-              <Label value="Conversion Date" />
+              <Tooltip content="If it's being applied, when does interest stop accruing?">
+                <Label>
+                  Conversion Date
+                  <TbInfoCircle
+                    className="m-1"
+                    style={{ display: "inline", verticalAlign: "top" }}
+                  />
+                </Label>
+              </Tooltip>
               <TextInput type="date" sizing="sm" name="conversionDate" />
             </div>
             <div className="">
