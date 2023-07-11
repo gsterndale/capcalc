@@ -115,34 +115,50 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
   }
 
   const summarizeNote = (note: NoteFields) => {
-    let summary = [
-      prettyUSD(note.principalInvested),
-      prettyPercent(note.conversionDiscount),
-      "discount",
-    ];
+    let summary = [prettyUSD(note.principalInvested)];
     if (note.conversionCap !== undefined)
-      summary.push(` ${prettyUSD(note.conversionCap)} Cap`);
+      summary.push(`with ${prettyUSD(note.conversionCap)} cap,`);
+    summary.push(prettyPercent(note.conversionDiscount), "disc");
     return summary.join(" ");
   };
 
   const detailNote = (note: NoteFields) => {
     let detail: string[] = [];
-    if (note.interestStartDate !== undefined) {
-      detail.push("starting");
+    if (note.interestRate == undefined || note.interestRate <= 0) return "";
+    detail.push(`${prettyPercent(note.interestRate)} APR`);
+    if (note.interestStartDate !== undefined)
       detail.push(note.interestStartDate.toLocaleDateString());
-    }
-    if (note.conversionDate !== undefined) {
-      detail.push("converting");
+    detail.push("-");
+    if (note.conversionDate !== undefined)
       detail.push(note.conversionDate.toLocaleDateString());
-    }
-    if (note.interestRate !== undefined)
-      detail.push(`${prettyPercent(note.interestRate)} APR`);
     return detail.join(" ");
+  };
+
+  const handleInterestRateChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value, type, checked } = event.target;
+    const inputValue = parseFloat(value);
+    const datesRequired = typeof inputValue == "number" && inputValue > 0;
+    const interestStartDateInput = document.querySelector(
+      "input[name=interestStartDate]"
+    ) as HTMLInputElement;
+    if (interestStartDateInput) {
+      interestStartDateInput.required = datesRequired;
+      interestStartDateInput.disabled = !datesRequired;
+    }
+    const conversionDateInput = document.querySelector(
+      "input[name=conversionDate]"
+    ) as HTMLInputElement;
+    if (conversionDateInput) {
+      conversionDateInput.required = datesRequired;
+      conversionDateInput.disabled = !datesRequired;
+    }
   };
 
   return (
     <div>
-      <fieldset>
+      <fieldset className="mb-6">
         <div className="flow-root">
           <ul className="divide-y divide-gray-200 dark:divide-gray-700">
             {notesFields.map((note, index) => (
@@ -192,6 +208,7 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                 sizing="sm"
                 name="principalInvested"
                 icon={TbCurrencyDollar}
+                min={0}
                 required={true}
               />
             </div>
@@ -202,6 +219,7 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                 sizing="sm"
                 name="conversionDiscount"
                 rightIcon={TbPercentage}
+                min={0}
                 required={true}
               />
             </div>
@@ -212,6 +230,7 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                 sizing="sm"
                 name="conversionCap"
                 icon={TbCurrencyDollar}
+                min={0}
               />
             </div>
           </div>
@@ -223,6 +242,8 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                 sizing="sm"
                 name="interestRate"
                 rightIcon={TbPercentage}
+                min={0}
+                onChange={handleInterestRateChange}
               />
             </div>
             <div>
