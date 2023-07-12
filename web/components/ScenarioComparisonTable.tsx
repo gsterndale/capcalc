@@ -1,6 +1,15 @@
 import React, { useState } from "react";
-import { Button, TextInput, Checkbox, Table, Select } from "flowbite-react";
 import {
+  Button,
+  TextInput,
+  Checkbox,
+  Table,
+  Select,
+  Tooltip,
+  Label,
+} from "flowbite-react";
+import {
+  TbInfoCircle,
   TbArrowRight,
   TbSquareRoundedArrowRight,
   TbSquareRoundedArrowLeft,
@@ -205,7 +214,17 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
               </Table.Cell>
             </Table.Row>
             <Table.Row>
-              <Table.Cell className="text-left">Description</Table.Cell>
+              <Table.Cell className="text-left">
+                <Tooltip content="Choose a few words to describe this scenario.">
+                  <Label>
+                    Description
+                    <TbInfoCircle
+                      className="m-1"
+                      style={{ display: "inline", verticalAlign: "top" }}
+                    />
+                  </Label>
+                </Tooltip>
+              </Table.Cell>
               {scenarioColumns.map((col, index) => (
                 <Table.Cell key={index}>{col.description}</Table.Cell>
               ))}
@@ -214,7 +233,17 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
               </Table.Cell>
             </Table.Row>
             <Table.Row>
-              <Table.Cell className="text-left">New Money Raised</Table.Cell>
+              <Table.Cell className="text-left">
+                <Tooltip content="How much money are you raising in this scenario?">
+                  <Label>
+                    New Money Raised
+                    <TbInfoCircle
+                      className="m-1"
+                      style={{ display: "inline", verticalAlign: "top" }}
+                    />
+                  </Label>
+                </Tooltip>
+              </Table.Cell>
               {scenarioColumns.map((col, index) => (
                 <Table.Cell key={index}>
                   {prettyUSD(col.newMoneyRaised)}
@@ -232,7 +261,17 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
               </Table.Cell>
             </Table.Row>
             <Table.Row>
-              <Table.Cell className="text-left">Pre-Money Valuation</Table.Cell>
+              <Table.Cell className="text-left">
+                <Tooltip content="What is the venture being valued at before you receive this investment?">
+                  <Label>
+                    Pre-Money Valuation
+                    <TbInfoCircle
+                      className="m-1"
+                      style={{ display: "inline", verticalAlign: "top" }}
+                    />
+                  </Label>
+                </Tooltip>
+              </Table.Cell>
               {scenarioColumns.map((col, index) => (
                 <Table.Cell key={index}>
                   {prettyUSD(col.preMoneyValuation)}
@@ -251,7 +290,15 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
             </Table.Row>
             <Table.Row>
               <Table.Cell className="text-left">
-                Post-Money Option Pool Size
+                <Tooltip content="What percent of equity will you reserve for employees after you receive this investment?">
+                  <Label>
+                    Post-Money Option Pool Size
+                    <TbInfoCircle
+                      className="m-1"
+                      style={{ display: "inline", verticalAlign: "top" }}
+                    />
+                  </Label>
+                </Tooltip>
               </Table.Cell>
               {scenarioColumns.map((col, index) => (
                 <Table.Cell key={index}>
@@ -270,7 +317,17 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
               </Table.Cell>
             </Table.Row>
             <Table.Row>
-              <Table.Cell className="text-left">Notes Convert</Table.Cell>
+              <Table.Cell className="text-left">
+                <Tooltip content="Will all of your convertible notes convert to equity upon receiving this investment?">
+                  <Label>
+                    Notes Convert
+                    <TbInfoCircle
+                      className="m-1"
+                      style={{ display: "inline", verticalAlign: "top" }}
+                    />
+                  </Label>
+                </Tooltip>
+              </Table.Cell>
               {scenarioColumns.map((col, index) => (
                 <Table.Cell key={index}>
                   {checkmark(col.noteConversion)}
@@ -282,7 +339,15 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
             </Table.Row>
             <Table.Row>
               <Table.Cell className="text-left">
-                Notes Convert to New Class
+                <Tooltip content="Will all of your convertible notes convert to a new share class upon receiving this investment?">
+                  <Label>
+                    Notes Convert to New Class
+                    <TbInfoCircle
+                      className="m-1"
+                      style={{ display: "inline", verticalAlign: "top" }}
+                    />
+                  </Label>
+                </Tooltip>
               </Table.Cell>
               {scenarioColumns.map((col, index) => (
                 <Table.Cell key={index}>
@@ -297,7 +362,17 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
               </Table.Cell>
             </Table.Row>
             <Table.Row>
-              <Table.Cell className="text-left">Expand Option Pool</Table.Cell>
+              <Table.Cell className="text-left">
+                <Tooltip content="Will you increase the amount of equity reserved for employees after receiving this investment?">
+                  <Label>
+                    Expand Option Pool
+                    <TbInfoCircle
+                      className="m-1"
+                      style={{ display: "inline", verticalAlign: "top" }}
+                    />
+                  </Label>
+                </Tooltip>
+              </Table.Cell>
               {scenarioColumns.map((col, index) => (
                 <Table.Cell key={index}>
                   {checkmark(col.expandOptionPool)}

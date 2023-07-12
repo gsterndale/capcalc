@@ -17,9 +17,11 @@ import {
   Card,
   Sidebar,
   Accordion,
+  Tooltip,
 } from "flowbite-react";
 import {
   TbCopy,
+  TbInfoCircle,
   TbArrowRight,
   TbSquareRoundedArrowRight,
   TbSquareRoundedArrowLeft,
@@ -273,7 +275,15 @@ const App: React.FC = () => {
             <Card className="w-full md:w-1/2 lg:w-1/3">
               <form onSubmit={handleSubmit}>
                 <fieldset>
-                  <Label htmlFor="name">Name</Label>
+                  <Tooltip content="What is the name of your venture?">
+                    <Label htmlFor="name">
+                      Name
+                      <TbInfoCircle
+                        className="m-1"
+                        style={{ display: "inline", verticalAlign: "top" }}
+                      />
+                    </Label>
+                  </Tooltip>
                   <TextInput
                     name="name"
                     sizing="sm"
@@ -281,7 +291,15 @@ const App: React.FC = () => {
                     value={organization.name}
                     onChange={handleOrganizationInputChange}
                   />
-                  <Label htmlFor="newShareClass">New Share Class</Label>
+                  <Tooltip content="What are you calling this new round of funding?">
+                    <Label htmlFor="newShareClass">
+                      New Share Class
+                      <TbInfoCircle
+                        className="m-1"
+                        style={{ display: "inline", verticalAlign: "top" }}
+                      />
+                    </Label>
+                  </Tooltip>
                   <TextInput
                     name="newShareClass"
                     sizing="sm"
