@@ -17,4 +17,5 @@ module.exports = {
     loader: "imgix",
     path: 'the "domain" of your Imigix source',
   },
+  output: "export",
 };
