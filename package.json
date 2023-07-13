@@ -7,8 +7,8 @@
     "export": "npm run export --workspaces --if-present"
   },
   "workspaces": [
-    "web",
-    "packages/*"
+    "packages/*",
+    "web"
   ],
   "devDependencies": {
     "typescript": "^5.0.4"
