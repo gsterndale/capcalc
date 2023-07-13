@@ -7,7 +7,8 @@
     "export": "npm run export --workspaces --if-present"
   },
   "workspaces": [
-    "packages/*",
+    "packages/utils",
+    "packages/calc",
     "web"
   ],
   "devDependencies": {
