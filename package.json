@@ -2,7 +2,9 @@
   "name": "@capcalc/monorepo",
   "version": "1.0.0",
   "scripts": {
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "export": "npm run export --workspaces --if-present"
   },
   "workspaces": [
     "web",
