@@ -9,6 +9,9 @@ jobs:
     concurrency: ci-${{ github.ref }}
     runs-on: ubuntu-latest
 
+    permissions:
+      packages: write
+
     steps:
       - name: Checkout 🛎️
         # https://github.com/actions/checkout
