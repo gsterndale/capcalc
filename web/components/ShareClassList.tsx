@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TextInput, Label, Table } from "flowbite-react";
 import { Organization } from "@capcalc/calc";
 import { prettyPercent, roundTo } from "@capcalc/utils";
+import parseFloatInLocale from "../common/parseFloatInLocale";
 
 type AppProps = {
   organization: Organization;
@@ -62,7 +63,7 @@ const ShareClassList: React.FC<AppProps> = (props: AppProps) => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value, type, checked } = event.target;
-    const inputValue = parseFloat(value);
+    const inputValue = parseFloatInLocale(value) || 0;
 
     props.handler({ key: name, shares: inputValue });
 
@@ -103,11 +104,10 @@ const ShareClassList: React.FC<AppProps> = (props: AppProps) => {
                 </Table.Cell>
                 <Table.Cell className="py-1 px-4">
                   <TextInput
-                    type="number"
+                    type="text"
                     sizing="sm"
-                    min={0}
                     name={shareClassRow.key}
-                    value={shareClassRow.shares}
+                    value={shareClassRow.shares.toLocaleString()}
                     onChange={handleShareClassInputChange}
                   />
                 </Table.Cell>

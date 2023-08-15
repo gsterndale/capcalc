@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import parseInput from "../common/parseInput";
+import parseFloatInLocale from "../common/parseFloatInLocale";
 import {
   Button,
   Tabs,
@@ -222,11 +223,14 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                 </Label>
               </Tooltip>
               <TextInput
-                type="number"
                 sizing="sm"
+                type="text"
+                onChange={(e) => {
+                  e.target.value =
+                    parseFloatInLocale(e.target.value)?.toLocaleString() || "";
+                }}
                 name="principalInvested"
                 icon={TbCurrencyDollar}
-                min={0}
                 required={true}
               />
             </div>
@@ -260,8 +264,12 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
                 </Label>
               </Tooltip>
               <TextInput
-                type="number"
                 sizing="sm"
+                type="text"
+                onChange={(e) => {
+                  e.target.value =
+                    parseFloatInLocale(e.target.value)?.toLocaleString() || "";
+                }}
                 name="conversionCap"
                 icon={TbCurrencyDollar}
                 min={0}
