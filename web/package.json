@@ -2,7 +2,7 @@
   "name": "@capcalc/web",
   "version": "1.0.0",
   "scripts": {
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

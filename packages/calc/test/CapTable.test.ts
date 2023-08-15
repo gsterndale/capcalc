@@ -5,6 +5,8 @@ import { AbstractNoteFactory } from "../src/Note";
 let org: Organization;
 beforeAll(() => {
   org = {
+    name: "Pied Piper LLC",
+    description: "",
     newShareClass: "Series A",
     preMoneyValuation: 30000000,
     newMoneyRaised: 1000000,
