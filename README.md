@@ -44,6 +44,10 @@ Open [http://localhost:3000](http://localhost:3000/) in your browser.
 npm run test
 ```
 
+### Deploy
+
+The web app is automatically deployed on GitHub pages using a GitHub Workflow that triggered by pushing to the "main" branch. Workflow configuration details can be found in `.github/workflows/build-and-deploy.yml`.
+
 ### Secrets
 
 Secrets are stored as ENV variables and should **not** be committed to this repository. An `.envrc.example` file _can_ be committed, and can be used as a template and copied.
