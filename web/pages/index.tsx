@@ -1,4 +1,5 @@
 import React, { useState, useRef, FormEvent } from "react";
+import Head from "next/head";
 import { CapTable, Organization, NoteFields } from "@capcalc/calc";
 import ShareClassList from "../components/ShareClassList";
 import ConvertibleNotesList from "../components/ConvertibleNotesList";
@@ -242,6 +243,14 @@ const App: React.FC = () => {
   return (
     <div className="mx-5 my-5">
       <div className="my-5">
+        <Head>
+          <title>Equity Financing Scenario Analysis Tool</title>
+          <meta
+            property="og:title"
+            content="Equity Financing Scenario Analysis Tool"
+            key="title"
+          />
+        </Head>
         {/*
         TODO shrink the h1 and hide the p upon scroll
         */}
