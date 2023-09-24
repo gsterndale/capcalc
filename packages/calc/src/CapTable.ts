@@ -65,7 +65,7 @@ class CapTable implements ICapTable {
       1000, // iterations
       5 // decimals
     );
-    return roundTo(spff, 5);
+    return roundTo(spff, 4);
   }
 
   shareClasses(): ShareClass[] {

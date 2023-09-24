@@ -43,6 +43,10 @@ describe("Discount option increase", () => {
       ],
     };
 
+    const table = new CapTable(org);
+
+    expect(table.sharePriceForFinancing()).toBeCloseTo(1.9931, 4); // Spreadsheet rounds to 4 decimal places
+
     const expected: StringNumberMap = {
       "Founders' Shares": 0,
       "Rest of Common": 8500000,
@@ -53,8 +57,6 @@ describe("Discount option increase", () => {
       "Options Available Before": 1000000,
       "New Options for Pool": 1483586,
     };
-
-    const table = new CapTable(org);
     const actual = postMoneySharesByName(table);
     expect(actual).toMatchObject(expected);
   });
