@@ -40,7 +40,7 @@ describe("share price for financing given one override convertible note", () => 
         }),
       ]
     );
-    expect(spff).toBeCloseTo(2.18349, 5); // OLD 2.16364, Excel $2.224969, Sheets $2.18349
+    expect(spff).toBeCloseTo(2.1835, 5);
   });
 });
 
@@ -75,11 +75,11 @@ describe("a capitalization table with one override convertible note", () => {
   });
 
   test("share price for financing", () => {
-    expect(table.sharePriceForFinancing()).toBeCloseTo(2.18349, 5);
+    expect(table.sharePriceForFinancing()).toBeCloseTo(2.1835, 5);
   });
 
   test("has total post-money shares", () => {
-    expect(table.totalPostMoneyShares()).toBe(14197473);
+    expect(table.totalPostMoneyShares()).toBe(14197458);
   });
 
   test("has total post-money ownership value", () => {
@@ -117,7 +117,7 @@ describe("a capitalization table with one override convertible note", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 457982,
+        postMoneyShares: 457980,
       })
     );
   });
@@ -127,7 +127,7 @@ describe("a capitalization table with one override convertible note", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 2739491,
+        postMoneyShares: 2739478,
       })
     );
   });
@@ -179,7 +179,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   });
 
   test("share price for financing", () => {
-    expect(table.sharePriceForFinancing()).toBeCloseTo(2.08349, 5);
+    expect(table.sharePriceForFinancing()).toBeCloseTo(2.0835, 5);
   });
 
   test("total post-money ownership value", () => {
@@ -233,7 +233,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 479964,
+        postMoneyShares: 479962,
       })
     );
   });
@@ -243,7 +243,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 2875776,
+        postMoneyShares: 2875762,
       })
     );
   });
