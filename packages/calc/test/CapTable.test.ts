@@ -42,6 +42,25 @@ describe("share price for financing given one override convertible note", () => 
     );
     expect(spff).toBeCloseTo(2.1835, 5);
   });
+
+  test("is calculted iteratively with no defined post money option pool size", () => {
+    const spff = CapTable.calcSharePriceForFinancing(
+      12565000,
+      33000000,
+      30000000,
+      1000000,
+      undefined,
+      [
+        AbstractNoteFactory.create({
+          conversionCap: 100000000,
+          conversionDiscount: 0.5,
+          conversionDate: new Date(),
+          principalInvested: 1000000,
+        }),
+      ]
+    );
+    expect(spff).toBeCloseTo(2.2284, 5);
+  });
 });
 
 describe("a capitalization table with one override convertible note", () => {

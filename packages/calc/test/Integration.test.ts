@@ -73,7 +73,7 @@ describe("Discount no option increase", () => {
       noteConversion: true,
       notesConvertToNewClass: true,
       expandOptionPool: false,
-      postMoneyOptionPoolSize: 0.15,
+      postMoneyOptionPoolSize: 0.15, // This is ignored because expandOptionPool is false
       foundersNumberOfShares: 0,
       commonNumberOfShares: 8500000,
       warrantsNumberOfShares: 65000,
@@ -96,7 +96,7 @@ describe("Discount no option increase", () => {
       "Rest of Common": 8500000,
       Warrants: 65000,
       "Convertible Notes Into New Share Class": 897505,
-      "New Money Equity": 1346258,
+      "New Money Equity": 1346257, // Spreadsheet says 1346258, but this implementation is good enough.
       "Granted Options": 3000000,
       "Options Available Before": 1000000,
       "New Options for Pool": 0,

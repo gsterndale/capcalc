@@ -39,7 +39,7 @@ class CapTable implements ICapTable {
     totalPostMoneyOwnershipValue: number,
     preMoneyValuation: number,
     oldOptionsNumberOfShares: number,
-    postMoneyOptionPoolSize: number,
+    postMoneyOptionPoolSize: number | undefined,
     notes: Note[]
   ): number {
     const startingGuess = preMoneyValuation / totalPreMoneyShares; // preMoneySharePrice
@@ -51,10 +51,15 @@ class CapTable implements ICapTable {
           },
           0
         );
-        const guessNewAndOldOptionsNumberOfShares =
-          (postMoneyOptionPoolSize * totalPostMoneyOwnershipValue) / guess;
-        const guessNewOptionsNumberOfShares =
-          guessNewAndOldOptionsNumberOfShares - oldOptionsNumberOfShares;
+        var guessNewOptionsNumberOfShares;
+        if (postMoneyOptionPoolSize === undefined) {
+          guessNewOptionsNumberOfShares = 0;
+        } else {
+          const guessNewAndOldOptionsNumberOfShares =
+            (postMoneyOptionPoolSize * totalPostMoneyOwnershipValue) / guess;
+          guessNewOptionsNumberOfShares =
+            guessNewAndOldOptionsNumberOfShares - oldOptionsNumberOfShares;
+        }
         const totalSharesBeforeFinancing =
           totalPreMoneyShares +
           guessNewOptionsNumberOfShares +
@@ -183,12 +188,15 @@ class CapTable implements ICapTable {
 
   sharePriceForFinancing(): number {
     if (this.spff === undefined) {
+      var postMoneyOptionPoolSize = undefined;
+      if (this.organization.expandOptionPool)
+        postMoneyOptionPoolSize = this.organization.postMoneyOptionPoolSize;
       this.spff = CapTable.calcSharePriceForFinancing(
         this.totalPreMoneyShares(),
         this.totalPostMoneyOwnershipValue(),
         this.organization.preMoneyValuation,
         this.organization.oldOptionsNumberOfShares,
-        this.organization.postMoneyOptionPoolSize,
+        postMoneyOptionPoolSize,
         this.notes
       );
     }
@@ -196,12 +204,16 @@ class CapTable implements ICapTable {
   }
 
   private newOptionsShareClassShares(): number {
-    return asShares(
-      (this.organization.postMoneyOptionPoolSize *
-        this.totalPostMoneyOwnershipValue()) /
-        this.sharePriceForFinancing() -
-        this.organization.oldOptionsNumberOfShares
-    );
+    if (this.organization.expandOptionPool) {
+      return asShares(
+        (this.organization.postMoneyOptionPoolSize *
+          this.totalPostMoneyOwnershipValue()) /
+          this.sharePriceForFinancing() -
+          this.organization.oldOptionsNumberOfShares
+      );
+    } else {
+      return 0;
+    }
   }
 
   private notesShareClassPostMoneyShares(): number {
