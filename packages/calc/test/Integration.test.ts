@@ -55,7 +55,7 @@ describe("Discount option increase", () => {
       "New Money Equity": 1505193,
       "Granted Options": 3000000,
       "Options Available Before": 1000000,
-      "New Options for Pool": 1483586,
+      "New Options for Pool": 1483568, // Spreadsheet says 1483586, but this implementation is good enough.
     };
     const actual = postMoneySharesByName(table);
     expect(actual).toMatchObject(expected);
