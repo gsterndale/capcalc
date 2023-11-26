@@ -22,7 +22,7 @@ interface Note extends NoteFields {
   conversionAmount(): number;
   value(sharePriceForFinancing: number, preMoneyShares: number): number;
   shares(sharePriceForFinancing: number, preMoneyShares: number): number;
-  price(sharePriceForFinancing: number): number;
+  price(sharePriceForFinancing: number, preMoneyShares: number): number;
 }
 
 class AbstractNoteFactory {
@@ -64,10 +64,11 @@ class ConvertibleNote implements Note {
   }
   shares(sharePriceForFinancing: number, preMoneyShares: number) {
     return asShares(
-      this.conversionAmount() / this.price(sharePriceForFinancing)
+      this.conversionAmount() /
+        this.price(sharePriceForFinancing, preMoneyShares)
     );
   }
-  price(sharePriceForFinancing: number) {
+  price(sharePriceForFinancing: number, preMoneyShares: number) {
     // In the spreadsheets this number is NOT rounded as you might expect a USD amount to be
     return sharePriceForFinancing * (1 - this.conversionDiscount);
   }
@@ -106,23 +107,28 @@ class CappedNote extends ConvertibleNote {
       this.capShares(sharePriceForFinancing, preMoneyShares)
     );
   }
-  price(preMoneyShares: number) {
+  price(sharePriceForFinancing: number, preMoneyShares: number) {
     return Math.min(
-      this.discountPrice(preMoneyShares),
-      this.capPrice(preMoneyShares)
+      this.discountPrice(sharePriceForFinancing, preMoneyShares),
+      this.capPrice(sharePriceForFinancing, preMoneyShares)
     );
   }
 
   private capValue(sharePriceForFinancing: number, preMoneyShares: number) {
-    const ratio = sharePriceForFinancing / this.capPrice(preMoneyShares);
+    const ratio =
+      sharePriceForFinancing /
+      this.capPrice(sharePriceForFinancing, preMoneyShares);
     // sharePriceForFinancing / (this.conversionCap / preMoneyShares)
     // In the spreadsheets this number is NOT rounded as you might expect a USD amount to be
     return this.conversionAmount() * ratio;
   }
   private capShares(sharePriceForFinancing: number, preMoneyShares: number) {
-    return asShares(this.conversionAmount() / this.capPrice(preMoneyShares));
+    return asShares(
+      this.conversionAmount() /
+        this.capPrice(sharePriceForFinancing, preMoneyShares)
+    );
   }
-  private capPrice(preMoneyShares: number) {
+  private capPrice(sharePriceForFinancing: number, preMoneyShares: number) {
     // In the spreadsheets this number is NOT rounded as you might expect a USD amount to be
     return this.conversionCap / preMoneyShares;
   }
@@ -137,10 +143,16 @@ class CappedNote extends ConvertibleNote {
     sharePriceForFinancing: number,
     preMoneyShares: number
   ) {
-    return super.shares(sharePriceForFinancing, preMoneyShares);
+    return asShares(
+      this.conversionAmount() /
+        this.discountPrice(sharePriceForFinancing, preMoneyShares)
+    );
   }
-  private discountPrice(preMoneyShares: number) {
-    return super.price(preMoneyShares);
+  private discountPrice(
+    sharePriceForFinancing: number,
+    preMoneyShares: number
+  ) {
+    return super.price(sharePriceForFinancing, preMoneyShares);
   }
 }
 

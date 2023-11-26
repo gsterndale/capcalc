@@ -36,8 +36,10 @@ describe("a uncapped note without interest", () => {
   });
 
   test("price to be a discount SPFF", () => {
-    expect(note.price(SPFF)).toBeCloseTo(SPFF * (1 - discount));
-    expect(note.price(SPFF * 1000)).toBeCloseTo(1000 * SPFF * (1 - discount));
+    expect(note.price(SPFF, PMS)).toBeCloseTo(SPFF * (1 - discount));
+    expect(note.price(SPFF * 1000, PMS)).toBeCloseTo(
+      1000 * SPFF * (1 - discount)
+    );
   });
 });
 
@@ -79,7 +81,7 @@ describe("a note with favorable cap", () => {
   });
 
   test("price is based on cap", () => {
-    expect(note.price(PMS)).toBeCloseTo(cap / PMS);
+    expect(note.price(SPFF, PMS)).toBeCloseTo(cap / PMS);
   });
 
   test("value is based on cap", () => {
@@ -103,7 +105,7 @@ describe("a note with favorable discount", () => {
   });
 
   test("price is based on discount", () => {
-    expect(note.price(SPFF)).toBeCloseTo(SPFF * (1 - discount));
+    expect(note.price(SPFF, PMS)).toBeCloseTo(SPFF * (1 - discount));
   });
 
   test("value is based on discount", () => {
