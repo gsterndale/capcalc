@@ -198,13 +198,15 @@ class CapTable implements ICapTable {
       var postMoneyOptionPoolSize = undefined;
       if (this.organization.expandOptionPool)
         postMoneyOptionPoolSize = this.organization.postMoneyOptionPoolSize;
+      var notes: Note[] = [];
+      if (this.organization.noteConversion) notes = this.notes;
       this.spff = CapTable.calcSharePriceForFinancing(
         this.totalPreMoneyShares(),
         this.totalPostMoneyOwnershipValue(),
         this.organization.preMoneyValuation,
         this.organization.oldOptionsNumberOfShares,
         postMoneyOptionPoolSize,
-        this.notes
+        notes
       );
     }
     return this.spff;
@@ -224,12 +226,16 @@ class CapTable implements ICapTable {
   }
 
   private notesShareClassPostMoneyShares(): number {
-    const spff = this.sharePriceForFinancing();
-    const tpms = this.totalPreMoneyShares();
-    const noscs = this.newOptionsShareClassShares();
-    return this.notes.reduce((memo: number, note: Note) => {
-      return memo + note.shares(spff, tpms, noscs);
-    }, 0);
+    if (this.organization.noteConversion) {
+      const spff = this.sharePriceForFinancing();
+      const tpms = this.totalPreMoneyShares();
+      const noscs = this.newOptionsShareClassShares();
+      return this.notes.reduce((memo: number, note: Note) => {
+        return memo + note.shares(spff, tpms, noscs);
+      }, 0);
+    } else {
+      return 0;
+    }
   }
 
   private newMoneyShareClassPostMoneyShares(): number {

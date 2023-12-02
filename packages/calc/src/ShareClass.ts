@@ -46,10 +46,18 @@ class ShareClass implements ShareClassFields {
     );
   }
   postMoneyDilution(totalPostMoneyShares: number, totalPreMoneyShares: number) {
-    return (
-      this.postMoneyPercentChange(totalPostMoneyShares, totalPreMoneyShares) /
-      this.preMoneyPercentOwnership(totalPreMoneyShares)
+    const postMoneyPercentChange = this.postMoneyPercentChange(
+      totalPostMoneyShares,
+      totalPreMoneyShares
     );
+    const preMoneyPercentOwnership =
+      this.preMoneyPercentOwnership(totalPreMoneyShares);
+
+    if (postMoneyPercentChange == 0) {
+      return 0;
+    } else {
+      return postMoneyPercentChange / preMoneyPercentOwnership;
+    }
   }
 }
 export default ShareClass;
