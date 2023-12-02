@@ -207,7 +207,7 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
           </Table.Head>
           <Table.Body>
             <Table.Row>
-              <Table.Cell rowSpan={8} className="text-left">
+              <Table.Cell rowSpan={7} className="text-left">
                 Deal mechanics
               </Table.Cell>
             </Table.Row>
