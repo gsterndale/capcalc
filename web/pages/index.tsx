@@ -100,7 +100,6 @@ const initialOrganizationState: Organization = {
   preMoneyValuation: 30000000,
   newMoneyRaised: 1000000,
   noteConversion: true,
-  notesConvertToNewClass: true,
   expandOptionPool: true,
   postMoneyOptionPoolSize: 0.2,
   foundersNumberOfShares: 8000000,

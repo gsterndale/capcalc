@@ -7,7 +7,6 @@ type Organization = {
   preMoneyValuation: number;
   newMoneyRaised: number;
   noteConversion: boolean;
-  notesConvertToNewClass: boolean;
   expandOptionPool: boolean;
   postMoneyOptionPoolSize: number;
   notesFields: NoteFields[];

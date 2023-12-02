@@ -48,7 +48,6 @@ type scenarioColumn = {
   preMoneyValuation: number;
   newMoneyRaised: number;
   noteConversion: boolean;
-  notesConvertToNewClass: boolean;
   expandOptionPool: boolean;
   postMoneyOptionPoolSize: number;
 
@@ -144,7 +143,6 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
         preMoneyValuation: capTable.organization.preMoneyValuation,
         newMoneyRaised: capTable.organization.newMoneyRaised,
         noteConversion: capTable.organization.noteConversion,
-        notesConvertToNewClass: capTable.organization.notesConvertToNewClass,
         expandOptionPool: capTable.organization.expandOptionPool,
         postMoneyOptionPoolSize: capTable.organization.postMoneyOptionPoolSize,
 
@@ -335,30 +333,6 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
               ))}
               <Table.Cell>
                 <Checkbox name="noteConversion" id="noteConversion" />
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell className="text-left">
-                <Tooltip content="Will all of your convertible notes convert to a new share class upon receiving this investment?">
-                  <Label>
-                    Notes Convert to New Class
-                    <TbInfoCircle
-                      className="m-1"
-                      style={{ display: "inline", verticalAlign: "top" }}
-                    />
-                  </Label>
-                </Tooltip>
-              </Table.Cell>
-              {scenarioColumns.map((col, index) => (
-                <Table.Cell key={index}>
-                  {checkmark(col.notesConvertToNewClass)}
-                </Table.Cell>
-              ))}
-              <Table.Cell>
-                <Checkbox
-                  name="notesConvertToNewClass"
-                  id="notesConvertToNewClass"
-                />
               </Table.Cell>
             </Table.Row>
             <Table.Row>
