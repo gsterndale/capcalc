@@ -120,10 +120,7 @@ describe("a capitalization table with one override convertible note", () => {
   });
 
   test("convertable note share class", () => {
-    const shareClass = findByName(
-      table.shareClasses(),
-      "Convertible Notes Into New Share Class"
-    );
+    const shareClass = findByName(table.shareClasses(), "Convertible Notes");
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
@@ -133,7 +130,7 @@ describe("a capitalization table with one override convertible note", () => {
   });
 
   test("new money share class", () => {
-    const shareClass = findByName(table.shareClasses(), "New Money Equity");
+    const shareClass = findByName(table.shareClasses(), "Preferred Investors");
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
@@ -143,7 +140,7 @@ describe("a capitalization table with one override convertible note", () => {
   });
 
   test("new options for pool share class", () => {
-    const shareClass = findByName(table.shareClasses(), "New Options for Pool");
+    const shareClass = findByName(table.shareClasses(), "Options Increase");
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
@@ -210,7 +207,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   });
 
   test("New money share class post-money ownership value", () => {
-    const shareClass = findByName(table.shareClasses(), "New Money Equity");
+    const shareClass = findByName(table.shareClasses(), "Preferred Investors");
     const expected = org.newMoneyRaised;
     const actual = shareClass.postMoneyOwnershipValue(
       table.sharePriceForFinancing()
@@ -222,11 +219,11 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   test("New options share class post-money ownership %", () => {
     const newOptionsShareClass = findByName(
       table.shareClasses(),
-      "New Options for Pool"
+      "Options Increase"
     );
     const oldOptionsShareClass = findByName(
       table.shareClasses(),
-      "Options Available Before"
+      "Options Available"
     );
     const totalPostMoneyShares = table.totalPostMoneyShares();
     expect(
@@ -236,10 +233,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   });
 
   test("convertable note share class", () => {
-    const shareClass = findByName(
-      table.shareClasses(),
-      "Convertible Notes Into New Share Class"
-    );
+    const shareClass = findByName(table.shareClasses(), "Convertible Notes");
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
@@ -249,7 +243,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   });
 
   test("new money equity share class", () => {
-    const shareClass = findByName(table.shareClasses(), "New Money Equity");
+    const shareClass = findByName(table.shareClasses(), "Preferred Investors");
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
@@ -259,7 +253,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   });
 
   test("new options for pool share class", () => {
-    const shareClass = findByName(table.shareClasses(), "New Options for Pool");
+    const shareClass = findByName(table.shareClasses(), "Options Increase");
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,

@@ -50,13 +50,13 @@ describe("Discount option increase", () => {
     const actual = postMoneySharesByName(table);
     expect(actual).toMatchObject({
       "Founders' Shares": 0,
-      "Rest of Common": 8500000,
-      Warrants: 65000,
-      "Convertible Notes Into New Share Class": 1003462,
-      "New Money Equity": 1505193,
-      "Granted Options": 3000000,
-      "Options Available Before": 1000000,
-      "New Options for Pool": expect.closeTo(1483586, -2),
+      "Other Common": 8500000,
+      "Common Warrants": 65000,
+      "Convertible Notes": 1003462,
+      "Preferred Investors": 1505193,
+      "Options Granted": 3000000,
+      "Options Available": 1000000,
+      "Options Increase": expect.closeTo(1483586, -2),
     });
   });
 });
@@ -94,13 +94,13 @@ describe("Discount no option increase", () => {
     const actual = postMoneySharesByName(table);
     expect(actual).toMatchObject({
       "Founders' Shares": 0,
-      "Rest of Common": 8500000,
-      Warrants: 65000,
-      "Convertible Notes Into New Share Class": 897505,
-      "New Money Equity": expect.closeTo(1346258, -2),
-      "Granted Options": 3000000,
-      "Options Available Before": 1000000,
-      "New Options for Pool": 0,
+      "Other Common": 8500000,
+      "Common Warrants": 65000,
+      "Convertible Notes": 897505,
+      "Preferred Investors": expect.closeTo(1346258, -2),
+      "Options Granted": 3000000,
+      "Options Available": 1000000,
+      "Options Increase": 0,
     });
   });
 });
@@ -137,13 +137,13 @@ describe("Conversion Cap Option Increase", () => {
     const actual = postMoneySharesByName(table);
     expect(actual).toMatchObject({
       "Founders' Shares": 0,
-      "Rest of Common": 8500000,
-      Warrants: 65000,
-      "Convertible Notes Into New Share Class": expect.closeTo(2884039, -2),
-      "New Money Equity": expect.closeTo(1730404, -2),
-      "Granted Options": 3000000,
-      "Options Available Before": 1000000,
-      "New Options for Pool": expect.closeTo(1855196, -2),
+      "Other Common": 8500000,
+      "Common Warrants": 65000,
+      "Convertible Notes": expect.closeTo(2884039, -2),
+      "Preferred Investors": expect.closeTo(1730404, -2),
+      "Options Granted": 3000000,
+      "Options Available": 1000000,
+      "Options Increase": expect.closeTo(1855196, -2),
     });
   });
 });
@@ -180,13 +180,13 @@ describe("Conversion Cap No Option Increase", () => {
     const actual = postMoneySharesByName(table);
     expect(actual).toMatchObject({
       "Founders' Shares": 0,
-      "Rest of Common": 8500000,
-      Warrants: 65000,
-      "Convertible Notes Into New Share Class": 2513000,
-      "New Money Equity": 1507765,
-      "Granted Options": 3000000,
-      "Options Available Before": 1000000,
-      "New Options for Pool": 0,
+      "Other Common": 8500000,
+      "Common Warrants": 65000,
+      "Convertible Notes": 2513000,
+      "Preferred Investors": 1507765,
+      "Options Granted": 3000000,
+      "Options Available": 1000000,
+      "Options Increase": 0,
     });
   });
 });
@@ -223,13 +223,13 @@ describe("Conversion Cap Discount Option Increase", () => {
     const actual = postMoneySharesByName(table);
     expect(actual).toMatchObject({
       "Founders' Shares": 0,
-      "Rest of Common": 8500000,
-      Warrants: 65000,
-      "Convertible Notes Into New Share Class": 1003462,
-      "New Money Equity": 1505193,
-      "Granted Options": 3000000,
-      "Options Available Before": 1000000,
-      "New Options for Pool": expect.closeTo(1483586, -2),
+      "Other Common": 8500000,
+      "Common Warrants": 65000,
+      "Convertible Notes": 1003462,
+      "Preferred Investors": 1505193,
+      "Options Granted": 3000000,
+      "Options Available": 1000000,
+      "Options Increase": expect.closeTo(1483586, -2),
     });
   });
 });
@@ -266,13 +266,13 @@ describe("Conversion Cap Discount No Option Increase", () => {
     const actual = postMoneySharesByName(table);
     expect(actual).toMatchObject({
       "Founders' Shares": 0,
-      "Rest of Common": 8500000,
-      Warrants: 65000,
-      "Convertible Notes Into New Share Class": 1003462,
-      "New Money Equity": 1505193,
-      "Granted Options": 3000000,
-      "Options Available Before": 1000000,
-      "New Options for Pool": expect.closeTo(1483586, -2),
+      "Other Common": 8500000,
+      "Common Warrants": 65000,
+      "Convertible Notes": 1003462,
+      "Preferred Investors": 1505193,
+      "Options Granted": 3000000,
+      "Options Available": 1000000,
+      "Options Increase": expect.closeTo(1483586, -2),
     });
   });
 });

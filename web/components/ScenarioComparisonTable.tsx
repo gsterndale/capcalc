@@ -423,13 +423,13 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
                     onChange={handleShareClassNameInputChange}
                   >
                     <option>Founders' Shares</option>
-                    <option>Rest of Common</option>
-                    <option>Warrants</option>
-                    <option>Convertible Notes Into New Share Class</option>
-                    <option>New Money Equity</option>
-                    <option>Granted Options</option>
-                    <option>Options Available Before</option>
-                    <option>New Options for Pool</option>
+                    <option>Other Common</option>
+                    <option>Common Warrants</option>
+                    <option>Convertible Notes</option>
+                    <option>Preferred Investors</option>
+                    <option>Options Granted</option>
+                    <option>Options Available</option>
+                    <option>Options Increase</option>
                   </Select>
                 </div>
                 <div className="w-2/5 text-left">share class</div>
