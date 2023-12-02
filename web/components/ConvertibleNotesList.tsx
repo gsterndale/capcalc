@@ -96,6 +96,10 @@ const ConvertibleNotesList: React.FC<AppProps> = (props: AppProps) => {
             typeof inputValue == "number"
           )
             inputValue = inputValue / 100.0;
+          if (["principalInvested", "conversionCap"].includes(name)) {
+            const parsedInLocale = parseFloatInLocale(value);
+            if (typeof parsedInLocale == "number") inputValue = parsedInLocale;
+          }
           memo.push([name, inputValue]);
         }
         return memo;
