@@ -6,6 +6,7 @@ const principal = 500000;
 const discount = 0.2;
 const SPFF = 2.5; // Share Price For Financing
 const PMS = 10000000; // Pre-Money Shares
+const NONOS = 100000; // New Options Number Of Shares
 
 describe("a uncapped note without interest", () => {
   const note = AbstractNoteFactory.create({
@@ -27,17 +28,19 @@ describe("a uncapped note without interest", () => {
   });
 
   test("value", () => {
-    expect(note.value(SPFF, PMS)).toBeCloseTo(principal / (1 - discount));
+    expect(note.value(SPFF, PMS, NONOS)).toBeCloseTo(
+      principal / (1 - discount)
+    );
   });
 
   test("shares", () => {
     const price = SPFF * (1 - discount);
-    expect(note.shares(SPFF, PMS)).toBeCloseTo(principal / price);
+    expect(note.shares(SPFF, PMS, NONOS)).toBeCloseTo(principal / price);
   });
 
   test("price to be a discount SPFF", () => {
-    expect(note.price(SPFF, PMS)).toBeCloseTo(SPFF * (1 - discount));
-    expect(note.price(SPFF * 1000, PMS)).toBeCloseTo(
+    expect(note.price(SPFF, PMS, NONOS)).toBeCloseTo(SPFF * (1 - discount));
+    expect(note.price(SPFF * 1000, PMS, NONOS)).toBeCloseTo(
       1000 * SPFF * (1 - discount)
     );
   });
@@ -62,13 +65,13 @@ describe("a uncapped note with interest", () => {
 
   test("value based on conversionAmount", () => {
     const ca = note.conversionAmount();
-    expect(note.value(SPFF, PMS)).toBeCloseTo(ca / (1 - discount));
+    expect(note.value(SPFF, PMS, NONOS)).toBeCloseTo(ca / (1 - discount));
   });
 
   test("shares based on conversionAmount", () => {
     const ca = note.conversionAmount();
     const price = SPFF * (1 - discount);
-    expect(note.shares(SPFF, PMS)).toBeCloseTo(ca / price);
+    expect(note.shares(SPFF, PMS, NONOS)).toBeCloseTo(ca / price);
   });
 });
 
@@ -79,20 +82,21 @@ describe("a note with favorable cap", () => {
     principalInvested: principal,
     conversionCap: cap,
   });
+  const expectedPrice = cap / (NONOS + PMS);
 
   test("price is based on cap", () => {
-    expect(note.price(SPFF, PMS)).toBeCloseTo(cap / PMS);
+    expect(note.price(SPFF, PMS, NONOS)).toBeCloseTo(expectedPrice);
   });
 
   test("value is based on cap", () => {
-    const price = cap / PMS;
-    const value = principal * (SPFF / price);
-    expect(note.value(SPFF, PMS)).toBeCloseTo(value);
+    const value = principal * (SPFF / expectedPrice);
+    expect(note.value(SPFF, PMS, NONOS)).toBeCloseTo(value);
   });
 
   test("shares is based on cap", () => {
-    const price = cap / PMS;
-    expect(note.shares(SPFF, PMS)).toBeCloseTo(principal / price);
+    expect(note.shares(SPFF, PMS, NONOS)).toBeCloseTo(
+      principal / expectedPrice
+    );
   });
 });
 
@@ -105,15 +109,17 @@ describe("a note with favorable discount", () => {
   });
 
   test("price is based on discount", () => {
-    expect(note.price(SPFF, PMS)).toBeCloseTo(SPFF * (1 - discount));
+    expect(note.price(SPFF, PMS, NONOS)).toBeCloseTo(SPFF * (1 - discount));
   });
 
   test("value is based on discount", () => {
-    expect(note.value(SPFF, PMS)).toBeCloseTo(principal / (1 - discount));
+    expect(note.value(SPFF, PMS, NONOS)).toBeCloseTo(
+      principal / (1 - discount)
+    );
   });
 
   test("shares is based on discount", () => {
     const price = SPFF * (1 - discount);
-    expect(note.shares(SPFF, PMS)).toBeCloseTo(principal / price);
+    expect(note.shares(SPFF, PMS, NONOS)).toBeCloseTo(principal / price);
   });
 });

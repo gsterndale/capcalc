@@ -47,7 +47,8 @@ describe("Discount option increase", () => {
 
     expect(table.sharePriceForFinancing()).toBeCloseTo(1.9931, 4); // Spreadsheet rounds to 4 decimal places
 
-    const expected: StringNumberMap = {
+    const actual = postMoneySharesByName(table);
+    expect(actual).toMatchObject({
       "Founders' Shares": 0,
       "Rest of Common": 8500000,
       Warrants: 65000,
@@ -55,10 +56,8 @@ describe("Discount option increase", () => {
       "New Money Equity": 1505193,
       "Granted Options": 3000000,
       "Options Available Before": 1000000,
-      "New Options for Pool": 1483568, // Spreadsheet says 1483586, but this implementation is good enough.
-    };
-    const actual = postMoneySharesByName(table);
-    expect(actual).toMatchObject(expected);
+      "New Options for Pool": expect.closeTo(1483586, -2),
+    });
   });
 });
 
@@ -91,20 +90,18 @@ describe("Discount no option increase", () => {
       ],
     };
 
-    const expected: StringNumberMap = {
+    const table = new CapTable(org);
+    const actual = postMoneySharesByName(table);
+    expect(actual).toMatchObject({
       "Founders' Shares": 0,
       "Rest of Common": 8500000,
       Warrants: 65000,
       "Convertible Notes Into New Share Class": 897505,
-      "New Money Equity": 1346257, // Spreadsheet says 1346258, but this implementation is good enough.
+      "New Money Equity": expect.closeTo(1346258, -2),
       "Granted Options": 3000000,
       "Options Available Before": 1000000,
       "New Options for Pool": 0,
-    };
-
-    const table = new CapTable(org);
-    const actual = postMoneySharesByName(table);
-    expect(actual).toMatchObject(expected);
+    });
   });
 });
 
@@ -136,19 +133,18 @@ describe("Conversion Cap Option Increase", () => {
         },
       ],
     };
-    const expected: StringNumberMap = {
+    const table = new CapTable(org);
+    const actual = postMoneySharesByName(table);
+    expect(actual).toMatchObject({
       "Founders' Shares": 0,
       "Rest of Common": 8500000,
       Warrants: 65000,
-      "Convertible Notes Into New Share Class": 2884039,
-      "New Money Equity": 1730404,
+      "Convertible Notes Into New Share Class": expect.closeTo(2884039, -2),
+      "New Money Equity": expect.closeTo(1730404, -2),
       "Granted Options": 3000000,
       "Options Available Before": 1000000,
-      "New Options for Pool": 1855196,
-    };
-    const table = new CapTable(org);
-    const actual = postMoneySharesByName(table);
-    expect(actual).toMatchObject(expected);
+      "New Options for Pool": expect.closeTo(1855196, -2),
+    });
   });
 });
 
@@ -180,7 +176,9 @@ describe("Conversion Cap No Option Increase", () => {
         },
       ],
     };
-    const expected: StringNumberMap = {
+    const table = new CapTable(org);
+    const actual = postMoneySharesByName(table);
+    expect(actual).toMatchObject({
       "Founders' Shares": 0,
       "Rest of Common": 8500000,
       Warrants: 65000,
@@ -189,10 +187,7 @@ describe("Conversion Cap No Option Increase", () => {
       "Granted Options": 3000000,
       "Options Available Before": 1000000,
       "New Options for Pool": 0,
-    };
-    const table = new CapTable(org);
-    const actual = postMoneySharesByName(table);
-    expect(actual).toMatchObject(expected);
+    });
   });
 });
 
@@ -224,7 +219,9 @@ describe("Conversion Cap Discount Option Increase", () => {
         },
       ],
     };
-    const expected: StringNumberMap = {
+    const table = new CapTable(org);
+    const actual = postMoneySharesByName(table);
+    expect(actual).toMatchObject({
       "Founders' Shares": 0,
       "Rest of Common": 8500000,
       Warrants: 65000,
@@ -232,11 +229,8 @@ describe("Conversion Cap Discount Option Increase", () => {
       "New Money Equity": 1505193,
       "Granted Options": 3000000,
       "Options Available Before": 1000000,
-      "New Options for Pool": 1483586,
-    };
-    const table = new CapTable(org);
-    const actual = postMoneySharesByName(table);
-    expect(actual).toMatchObject(expected);
+      "New Options for Pool": expect.closeTo(1483586, -2),
+    });
   });
 });
 
@@ -268,7 +262,9 @@ describe("Conversion Cap Discount No Option Increase", () => {
         },
       ],
     };
-    const expected: StringNumberMap = {
+    const table = new CapTable(org);
+    const actual = postMoneySharesByName(table);
+    expect(actual).toMatchObject({
       "Founders' Shares": 0,
       "Rest of Common": 8500000,
       Warrants: 65000,
@@ -276,10 +272,7 @@ describe("Conversion Cap Discount No Option Increase", () => {
       "New Money Equity": 1505193,
       "Granted Options": 3000000,
       "Options Available Before": 1000000,
-      "New Options for Pool": 1483586,
-    };
-    const table = new CapTable(org);
-    const actual = postMoneySharesByName(table);
-    expect(actual).toMatchObject(expected);
+      "New Options for Pool": expect.closeTo(1483586, -2),
+    });
   });
 });

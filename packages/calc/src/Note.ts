@@ -20,9 +20,21 @@ interface Note extends NoteFields {
   readonly name?: string;
 
   conversionAmount(): number;
-  value(sharePriceForFinancing: number, preMoneyShares: number): number;
-  shares(sharePriceForFinancing: number, preMoneyShares: number): number;
-  price(sharePriceForFinancing: number, preMoneyShares: number): number;
+  value(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ): number;
+  shares(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ): number;
+  price(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ): number;
 }
 
 class AbstractNoteFactory {
@@ -58,17 +70,36 @@ class ConvertibleNote implements Note {
   conversionAmount() {
     return this.principalInvested + this.interestAccrued();
   }
-  value(sharePriceForFinancing: number, preMoneyShares: number) {
+
+  value(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ) {
     // In the spreadsheets this number is NOT rounded as you might expect a USD amount to be
     return this.conversionAmount() / (1 - this.conversionDiscount);
   }
-  shares(sharePriceForFinancing: number, preMoneyShares: number) {
+
+  shares(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ) {
     return asShares(
       this.conversionAmount() /
-        this.price(sharePriceForFinancing, preMoneyShares)
+        this.price(
+          sharePriceForFinancing,
+          preMoneyShares,
+          newOptionsShareClassShares
+        )
     );
   }
-  price(sharePriceForFinancing: number, preMoneyShares: number) {
+
+  price(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ) {
     // In the spreadsheets this number is NOT rounded as you might expect a USD amount to be
     return sharePriceForFinancing * (1 - this.conversionDiscount);
   }
@@ -95,64 +126,160 @@ class CappedNote extends ConvertibleNote {
       this.conversionCap = attrs.conversionCap;
   }
 
-  value(sharePriceForFinancing: number, preMoneyShares: number) {
+  value(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ) {
+    //console.log({
+    //  preMoneyShares,
+    //  guess: sharePriceForFinancing,
+    //  discountValue: this.discountValue(sharePriceForFinancing, preMoneyShares),
+    //  capValue: this.capValue(sharePriceForFinancing, preMoneyShares),
+    //});
     return Math.max(
-      this.discountValue(sharePriceForFinancing, preMoneyShares),
-      this.capValue(sharePriceForFinancing, preMoneyShares)
-    );
-  }
-  shares(sharePriceForFinancing: number, preMoneyShares: number) {
-    return Math.max(
-      this.discountShares(sharePriceForFinancing, preMoneyShares),
-      this.capShares(sharePriceForFinancing, preMoneyShares)
-    );
-  }
-  price(sharePriceForFinancing: number, preMoneyShares: number) {
-    return Math.min(
-      this.discountPrice(sharePriceForFinancing, preMoneyShares),
-      this.capPrice(sharePriceForFinancing, preMoneyShares)
+      this.discountValue(
+        sharePriceForFinancing,
+        preMoneyShares,
+        newOptionsShareClassShares
+      ),
+      this.capValue(
+        sharePriceForFinancing,
+        preMoneyShares,
+        newOptionsShareClassShares
+      )
     );
   }
 
-  private capValue(sharePriceForFinancing: number, preMoneyShares: number) {
+  shares(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ) {
+    //console.log({
+    //  preMoneyShares,
+    //  guess: sharePriceForFinancing,
+    //  discountShares: this.discountShares(
+    //    sharePriceForFinancing,
+    //    preMoneyShares
+    //  ),
+    //  capShares: this.capShares(sharePriceForFinancing, preMoneyShares),
+    //});
+    return Math.max(
+      this.discountShares(
+        sharePriceForFinancing,
+        preMoneyShares,
+        newOptionsShareClassShares
+      ),
+      this.capShares(
+        sharePriceForFinancing,
+        preMoneyShares,
+        newOptionsShareClassShares
+      )
+    );
+  }
+
+  price(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ) {
+    //console.log({
+    //  preMoneyShares,
+    //  discountPrice: this.discountPrice(sharePriceForFinancing, preMoneyShares),
+    //  capPrice: this.capPrice(sharePriceForFinancing, preMoneyShares),
+    //});
+    return Math.min(
+      this.discountPrice(
+        sharePriceForFinancing,
+        preMoneyShares,
+        newOptionsShareClassShares
+      ),
+      this.capPrice(
+        sharePriceForFinancing,
+        preMoneyShares,
+        newOptionsShareClassShares
+      )
+    );
+  }
+
+  private capValue(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ) {
     const ratio =
       sharePriceForFinancing /
-      this.capPrice(sharePriceForFinancing, preMoneyShares);
+      this.capPrice(
+        sharePriceForFinancing,
+        preMoneyShares,
+        newOptionsShareClassShares
+      );
     // sharePriceForFinancing / (this.conversionCap / preMoneyShares)
     // In the spreadsheets this number is NOT rounded as you might expect a USD amount to be
     return this.conversionAmount() * ratio;
   }
-  private capShares(sharePriceForFinancing: number, preMoneyShares: number) {
+
+  private capShares(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ) {
     return asShares(
       this.conversionAmount() /
-        this.capPrice(sharePriceForFinancing, preMoneyShares)
+        this.capPrice(
+          sharePriceForFinancing,
+          preMoneyShares,
+          newOptionsShareClassShares
+        )
     );
   }
-  private capPrice(sharePriceForFinancing: number, preMoneyShares: number) {
+
+  private capPrice(
+    sharePriceForFinancing: number,
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
+  ) {
     // In the spreadsheets this number is NOT rounded as you might expect a USD amount to be
-    return this.conversionCap / preMoneyShares;
+    return this.conversionCap / (preMoneyShares + newOptionsShareClassShares);
   }
 
   private discountValue(
     sharePriceForFinancing: number,
-    preMoneyShares: number
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
   ) {
-    return super.value(sharePriceForFinancing, preMoneyShares);
+    return super.value(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
+    );
   }
+
   private discountShares(
     sharePriceForFinancing: number,
-    preMoneyShares: number
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
   ) {
     return asShares(
       this.conversionAmount() /
-        this.discountPrice(sharePriceForFinancing, preMoneyShares)
+        this.discountPrice(
+          sharePriceForFinancing,
+          preMoneyShares,
+          newOptionsShareClassShares
+        )
     );
   }
   private discountPrice(
     sharePriceForFinancing: number,
-    preMoneyShares: number
+    preMoneyShares: number,
+    newOptionsShareClassShares: number
   ) {
-    return super.price(sharePriceForFinancing, preMoneyShares);
+    return super.price(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
+    );
   }
 }
 

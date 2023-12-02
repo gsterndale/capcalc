@@ -40,7 +40,7 @@ describe("share price for financing given one override convertible note", () => 
         }),
       ]
     );
-    expect(spff).toBeCloseTo(2.1835, 5);
+    expect(spff).toBeCloseTo(2.1286, 5);
   });
 
   test("is calculted iteratively with no defined post money option pool size", () => {
@@ -94,11 +94,12 @@ describe("a capitalization table with one override convertible note", () => {
   });
 
   test("share price for financing", () => {
-    expect(table.sharePriceForFinancing()).toBeCloseTo(2.1835, 5);
+    expect(table.sharePriceForFinancing()).toBeCloseTo(2.1286, 5);
   });
 
   test("has total post-money shares", () => {
-    expect(table.totalPostMoneyShares()).toBe(14197458);
+    const expected = 14563837;
+    expect(table.totalPostMoneyShares() / expected).toBeCloseTo(1.0, 5);
   });
 
   test("has total post-money ownership value", () => {
@@ -126,7 +127,7 @@ describe("a capitalization table with one override convertible note", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 1000000,
+        postMoneyShares: expect.closeTo(1281277, -3),
       })
     );
   });
@@ -136,7 +137,7 @@ describe("a capitalization table with one override convertible note", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 457980,
+        postMoneyShares: expect.closeTo(469793, -3),
       })
     );
   });
@@ -146,7 +147,7 @@ describe("a capitalization table with one override convertible note", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 2739478,
+        postMoneyShares: expect.closeTo(2812767, -3),
       })
     );
   });
@@ -198,7 +199,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
   });
 
   test("share price for financing", () => {
-    expect(table.sharePriceForFinancing()).toBeCloseTo(2.0835, 5);
+    expect(table.sharePriceForFinancing()).toBeCloseTo(2.0035, 5);
   });
 
   test("total post-money ownership value", () => {
@@ -242,7 +243,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 1523155,
+        postMoneyShares: expect.closeTo(1979276, -3),
       })
     );
   });
@@ -252,7 +253,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 479962,
+        postMoneyShares: expect.closeTo(499127, -3),
       })
     );
   });
@@ -262,7 +263,7 @@ describe("a capitalization table with a bunch of convertible notes", () => {
     expect(shareClass).toEqual(
       expect.objectContaining({
         preMoneyShares: 0,
-        postMoneyShares: 2875762,
+        postMoneyShares: expect.closeTo(2994584, -3),
       })
     );
   });

@@ -45,13 +45,7 @@ class CapTable implements ICapTable {
     const startingGuess = preMoneyValuation / totalPreMoneyShares; // preMoneySharePrice
     let spff: number = iterate(
       (guess: number): number => {
-        const notesShareClassShares = notes.reduce(
-          (memo: number, note: Note) => {
-            return memo + note.shares(guess, totalPreMoneyShares);
-          },
-          0
-        );
-        var guessNewOptionsNumberOfShares;
+        var guessNewOptionsNumberOfShares: number;
         if (postMoneyOptionPoolSize === undefined) {
           guessNewOptionsNumberOfShares = 0;
         } else {
@@ -60,6 +54,19 @@ class CapTable implements ICapTable {
           guessNewOptionsNumberOfShares =
             guessNewAndOldOptionsNumberOfShares - oldOptionsNumberOfShares;
         }
+        const notesShareClassShares = notes.reduce(
+          (memo: number, note: Note) => {
+            return (
+              memo +
+              note.shares(
+                guess,
+                totalPreMoneyShares,
+                guessNewOptionsNumberOfShares
+              )
+            );
+          },
+          0
+        );
         const totalSharesBeforeFinancing =
           totalPreMoneyShares +
           guessNewOptionsNumberOfShares +
@@ -217,11 +224,11 @@ class CapTable implements ICapTable {
   }
 
   private notesShareClassPostMoneyShares(): number {
+    const spff = this.sharePriceForFinancing();
+    const tpms = this.totalPreMoneyShares();
+    const noscs = this.newOptionsShareClassShares();
     return this.notes.reduce((memo: number, note: Note) => {
-      return (
-        memo +
-        note.shares(this.sharePriceForFinancing(), this.totalPreMoneyShares())
-      );
+      return memo + note.shares(spff, tpms, noscs);
     }, 0);
   }
 
