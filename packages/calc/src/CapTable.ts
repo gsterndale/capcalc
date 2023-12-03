@@ -45,15 +45,11 @@ class CapTable implements ICapTable {
     const startingGuess = preMoneyValuation / totalPreMoneyShares; // preMoneySharePrice
     let spff: number = iterate(
       (guess: number): number => {
-        var guessNewOptionsNumberOfShares: number;
-        if (postMoneyOptionPoolSize === undefined) {
-          guessNewOptionsNumberOfShares = 0;
-        } else {
-          const guessNewAndOldOptionsNumberOfShares =
-            (postMoneyOptionPoolSize * totalPostMoneyOwnershipValue) / guess;
-          guessNewOptionsNumberOfShares =
-            guessNewAndOldOptionsNumberOfShares - oldOptionsNumberOfShares;
-        }
+        let guessNewOptionsNumberOfShares: number =
+          postMoneyOptionPoolSize === undefined
+            ? 0
+            : (postMoneyOptionPoolSize * totalPostMoneyOwnershipValue) / guess -
+              oldOptionsNumberOfShares;
         const notesShareClassShares = notes.reduce(
           (memo: number, note: Note) => {
             return (
@@ -195,20 +191,24 @@ class CapTable implements ICapTable {
 
   sharePriceForFinancing(): number {
     if (this.spff === undefined) {
-      var postMoneyOptionPoolSize = undefined;
-      if (this.organization.expandOptionPool)
-        postMoneyOptionPoolSize = this.organization.postMoneyOptionPoolSize;
-      var notes: Note[] = [];
-      if (this.organization.noteConversion) notes = this.notes;
+      const {
+        expandOptionPool,
+        postMoneyOptionPoolSize,
+        noteConversion,
+        preMoneyValuation,
+        oldOptionsNumberOfShares,
+      } = this.organization;
+
       this.spff = CapTable.calcSharePriceForFinancing(
         this.totalPreMoneyShares(),
         this.totalPostMoneyOwnershipValue(),
-        this.organization.preMoneyValuation,
-        this.organization.oldOptionsNumberOfShares,
-        postMoneyOptionPoolSize,
-        notes
+        preMoneyValuation,
+        oldOptionsNumberOfShares,
+        expandOptionPool ? postMoneyOptionPoolSize : undefined,
+        noteConversion ? this.notes : []
       );
     }
+
     return this.spff;
   }
 
@@ -226,16 +226,16 @@ class CapTable implements ICapTable {
   }
 
   private notesShareClassPostMoneyShares(): number {
-    if (this.organization.noteConversion) {
-      const spff = this.sharePriceForFinancing();
-      const tpms = this.totalPreMoneyShares();
-      const noscs = this.newOptionsShareClassShares();
-      return this.notes.reduce((memo: number, note: Note) => {
-        return memo + note.shares(spff, tpms, noscs);
-      }, 0);
-    } else {
-      return 0;
-    }
+    if (!this.organization.noteConversion) return 0;
+
+    const spff = this.sharePriceForFinancing();
+    const tpms = this.totalPreMoneyShares();
+    const noscs = this.newOptionsShareClassShares();
+
+    return this.notes.reduce(
+      (memo: number, note: Note) => memo + note.shares(spff, tpms, noscs),
+      0
+    );
   }
 
   private newMoneyShareClassPostMoneyShares(): number {

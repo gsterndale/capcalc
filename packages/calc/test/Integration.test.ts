@@ -1,17 +1,12 @@
 import { describe, expect, test } from "@jest/globals";
 import { Organization, CapTable, ShareClass } from "../src/index";
 
-type StringNumberMap = {
-  [key: string]: number | undefined;
-};
+type StringNumberMap = Record<string, number | undefined>;
 
 function postMoneySharesByName(table: CapTable): StringNumberMap {
-  return table
-    .shareClasses()
-    .reduce((memo: StringNumberMap, shareClass: ShareClass) => {
-      memo[shareClass.name] = shareClass.postMoneyShares;
-      return memo;
-    }, {});
+  return table.shareClasses().reduce<StringNumberMap>((memo, shareClass) => {
+    return { ...memo, [shareClass.name]: shareClass.postMoneyShares };
+  }, {});
 }
 
 describe("Discount option increase", () => {

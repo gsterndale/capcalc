@@ -1,8 +1,8 @@
-type ShareClassFields = {
+interface ShareClassFields {
   name: string;
   preMoneyShares: number;
   postMoneyShares: number;
-};
+}
 
 class ShareClass implements ShareClassFields {
   readonly name: string;
@@ -15,37 +15,46 @@ class ShareClass implements ShareClassFields {
     this.postMoneyShares = attrs.postMoneyShares;
   }
 
-  preMoneyPercentOwnership(totalPreMoneyShares: number) {
+  preMoneyPercentOwnership(totalPreMoneyShares: number): number {
     return this.preMoneyShares / totalPreMoneyShares;
   }
-  preMoneyOwnershipValue(preMoneySharePrice: number) {
+
+  preMoneyOwnershipValue(preMoneySharePrice: number): number {
     return preMoneySharePrice * this.preMoneyShares;
   }
-  postMoneyPercentOwnership(totalPostMoneyShares: number) {
+
+  postMoneyPercentOwnership(totalPostMoneyShares: number): number {
     return this.postMoneyShares / totalPostMoneyShares;
   }
-  postMoneyOwnershipValue(sharePriceForFinancing: number) {
+
+  postMoneyOwnershipValue(sharePriceForFinancing: number): number {
     return sharePriceForFinancing * this.postMoneyShares;
   }
+
   postMoneyPercentChange(
     totalPostMoneyShares: number,
     totalPreMoneyShares: number
-  ) {
+  ): number {
     return (
       this.postMoneyPercentOwnership(totalPostMoneyShares) -
       this.preMoneyPercentOwnership(totalPreMoneyShares)
     );
   }
+
   postMoneyValueChange(
     sharePriceForFinancing: number,
     preMoneySharePrice: number
-  ) {
+  ): number {
     return (
       this.postMoneyOwnershipValue(sharePriceForFinancing) -
       this.preMoneyOwnershipValue(preMoneySharePrice)
     );
   }
-  postMoneyDilution(totalPostMoneyShares: number, totalPreMoneyShares: number) {
+
+  postMoneyDilution(
+    totalPostMoneyShares: number,
+    totalPreMoneyShares: number
+  ): number {
     const postMoneyPercentChange = this.postMoneyPercentChange(
       totalPostMoneyShares,
       totalPreMoneyShares
@@ -53,11 +62,10 @@ class ShareClass implements ShareClassFields {
     const preMoneyPercentOwnership =
       this.preMoneyPercentOwnership(totalPreMoneyShares);
 
-    if (postMoneyPercentChange == 0) {
-      return 0;
-    } else {
-      return postMoneyPercentChange / preMoneyPercentOwnership;
-    }
+    return postMoneyPercentChange === 0
+      ? 0
+      : postMoneyPercentChange / preMoneyPercentOwnership;
   }
 }
+
 export default ShareClass;

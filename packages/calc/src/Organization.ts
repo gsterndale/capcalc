@@ -1,6 +1,6 @@
 import { NoteFields } from "./Note";
 
-type Organization = {
+interface Organization {
   name: string;
   description: string;
   newShareClass: string;
@@ -15,6 +15,6 @@ type Organization = {
   warrantsNumberOfShares: number;
   grantedOptionsNumberOfShares: number;
   oldOptionsNumberOfShares: number;
-};
+}
 
 export default Organization;

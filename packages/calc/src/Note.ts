@@ -1,6 +1,6 @@
 import { asUSD, asShares, roundTo, simpleInterest } from "@capcalc/utils";
 
-type NoteFields = {
+interface NoteFields {
   principalInvested: number;
   conversionDiscount: number;
   conversionDate?: Date;
@@ -8,7 +8,7 @@ type NoteFields = {
   interestStartDate?: Date;
   conversionCap?: number;
   name?: string;
-};
+}
 
 interface Note extends NoteFields {
   readonly principalInvested: number;
@@ -39,11 +39,9 @@ interface Note extends NoteFields {
 
 class AbstractNoteFactory {
   static create(attrs: NoteFields): Note {
-    if (attrs.conversionCap === undefined) {
-      return new ConvertibleNote(attrs);
-    } else {
-      return new CappedNote(attrs);
-    }
+    return attrs.conversionCap === undefined
+      ? new ConvertibleNote(attrs)
+      : new CappedNote(attrs);
   }
 }
 
@@ -56,15 +54,23 @@ class ConvertibleNote implements Note {
   readonly name: string = "";
 
   constructor(attrs: NoteFields) {
-    this.principalInvested = attrs.principalInvested;
-    this.conversionDiscount = attrs.conversionDiscount;
-    if (attrs.conversionDate !== undefined)
-      this.conversionDate = attrs.conversionDate;
-    if (attrs.interestRate !== undefined)
-      this.interestRate = attrs.interestRate;
-    if (attrs.interestStartDate !== undefined)
-      this.interestStartDate = attrs.interestStartDate;
-    if (attrs.name !== undefined) this.name = attrs.name;
+    const {
+      principalInvested,
+      conversionDiscount,
+      conversionDate,
+      interestRate,
+      interestStartDate,
+      name,
+    } = attrs;
+
+    this.principalInvested = principalInvested;
+    this.conversionDiscount = conversionDiscount;
+    this.conversionDate =
+      conversionDate !== undefined ? conversionDate : new Date();
+    this.interestRate = interestRate !== undefined ? interestRate : 0;
+    this.interestStartDate =
+      interestStartDate !== undefined ? interestStartDate : new Date();
+    this.name = name !== undefined ? name : "";
   }
 
   conversionAmount() {
@@ -131,24 +137,17 @@ class CappedNote extends ConvertibleNote {
     preMoneyShares: number,
     newOptionsShareClassShares: number
   ) {
-    //console.log({
-    //  preMoneyShares,
-    //  guess: sharePriceForFinancing,
-    //  discountValue: this.discountValue(sharePriceForFinancing, preMoneyShares),
-    //  capValue: this.capValue(sharePriceForFinancing, preMoneyShares),
-    //});
-    return Math.max(
-      this.discountValue(
-        sharePriceForFinancing,
-        preMoneyShares,
-        newOptionsShareClassShares
-      ),
-      this.capValue(
-        sharePriceForFinancing,
-        preMoneyShares,
-        newOptionsShareClassShares
-      )
+    const discountValue = this.discountValue(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
     );
+    const capValue = this.capValue(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
+    );
+    return Math.max(discountValue, capValue);
   }
 
   shares(
@@ -156,27 +155,17 @@ class CappedNote extends ConvertibleNote {
     preMoneyShares: number,
     newOptionsShareClassShares: number
   ) {
-    //console.log({
-    //  preMoneyShares,
-    //  guess: sharePriceForFinancing,
-    //  discountShares: this.discountShares(
-    //    sharePriceForFinancing,
-    //    preMoneyShares
-    //  ),
-    //  capShares: this.capShares(sharePriceForFinancing, preMoneyShares),
-    //});
-    return Math.max(
-      this.discountShares(
-        sharePriceForFinancing,
-        preMoneyShares,
-        newOptionsShareClassShares
-      ),
-      this.capShares(
-        sharePriceForFinancing,
-        preMoneyShares,
-        newOptionsShareClassShares
-      )
+    const discountShares = this.discountShares(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
     );
+    const capShares = this.capShares(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
+    );
+    return Math.max(discountShares, capShares);
   }
 
   price(
@@ -184,23 +173,17 @@ class CappedNote extends ConvertibleNote {
     preMoneyShares: number,
     newOptionsShareClassShares: number
   ) {
-    //console.log({
-    //  preMoneyShares,
-    //  discountPrice: this.discountPrice(sharePriceForFinancing, preMoneyShares),
-    //  capPrice: this.capPrice(sharePriceForFinancing, preMoneyShares),
-    //});
-    return Math.min(
-      this.discountPrice(
-        sharePriceForFinancing,
-        preMoneyShares,
-        newOptionsShareClassShares
-      ),
-      this.capPrice(
-        sharePriceForFinancing,
-        preMoneyShares,
-        newOptionsShareClassShares
-      )
+    const discountPrice = this.discountPrice(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
     );
+    const capPrice = this.capPrice(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
+    );
+    return Math.min(discountPrice, capPrice);
   }
 
   private capValue(
@@ -208,15 +191,12 @@ class CappedNote extends ConvertibleNote {
     preMoneyShares: number,
     newOptionsShareClassShares: number
   ) {
-    const ratio =
-      sharePriceForFinancing /
-      this.capPrice(
-        sharePriceForFinancing,
-        preMoneyShares,
-        newOptionsShareClassShares
-      );
-    // sharePriceForFinancing / (this.conversionCap / preMoneyShares)
-    // In the spreadsheets this number is NOT rounded as you might expect a USD amount to be
+    const capPrice = this.capPrice(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
+    );
+    const ratio = sharePriceForFinancing / capPrice;
     return this.conversionAmount() * ratio;
   }
 
@@ -225,14 +205,12 @@ class CappedNote extends ConvertibleNote {
     preMoneyShares: number,
     newOptionsShareClassShares: number
   ) {
-    return asShares(
-      this.conversionAmount() /
-        this.capPrice(
-          sharePriceForFinancing,
-          preMoneyShares,
-          newOptionsShareClassShares
-        )
+    const capPrice = this.capPrice(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
     );
+    return asShares(this.conversionAmount() / capPrice);
   }
 
   private capPrice(
@@ -261,14 +239,12 @@ class CappedNote extends ConvertibleNote {
     preMoneyShares: number,
     newOptionsShareClassShares: number
   ) {
-    return asShares(
-      this.conversionAmount() /
-        this.discountPrice(
-          sharePriceForFinancing,
-          preMoneyShares,
-          newOptionsShareClassShares
-        )
+    const discountPrice = this.discountPrice(
+      sharePriceForFinancing,
+      preMoneyShares,
+      newOptionsShareClassShares
     );
+    return asShares(this.conversionAmount() / discountPrice);
   }
   private discountPrice(
     sharePriceForFinancing: number,
