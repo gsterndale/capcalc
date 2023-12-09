@@ -39,6 +39,7 @@ import {
 import { CapTable, ShareClass, type Organization } from "@capcalc/calc";
 import { prettyPercent, prettyShares, prettyUSD } from "@capcalc/utils";
 import parseInput from "../common/parseInput";
+import parseFloatInLocale from "../common/parseFloatInLocale";
 
 type scenarioColumn = {
   key: number;
@@ -112,6 +113,10 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
             typeof inputValue == "number"
           )
             inputValue = inputValue / 100.0;
+          if (["newMoneyRaised", "preMoneyValuation"].includes(name)) {
+            const parsedInLocale = parseFloatInLocale(value);
+            if (typeof parsedInLocale == "number") inputValue = parsedInLocale;
+          }
           memo.push([name, inputValue]);
         }
         return memo;
@@ -250,7 +255,12 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
               <Table.Cell className="w-44">
                 <TextInput
                   sizing="sm"
-                  type="number"
+                  type="text"
+                  onChange={(e) => {
+                    e.target.value =
+                      parseFloatInLocale(e.target.value)?.toLocaleString() ||
+                      "";
+                  }}
                   name="newMoneyRaised"
                   icon={TbCurrencyDollar}
                   required={true}
@@ -278,7 +288,12 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
               <Table.Cell>
                 <TextInput
                   sizing="sm"
-                  type="number"
+                  type="text"
+                  onChange={(e) => {
+                    e.target.value =
+                      parseFloatInLocale(e.target.value)?.toLocaleString() ||
+                      "";
+                  }}
                   name="preMoneyValuation"
                   icon={TbCurrencyDollar}
                   required={true}
