@@ -423,48 +423,54 @@ const App: React.FC = () => {
         <Tabs.Item icon={TbTable} title="Cap Table">
           <div className="flex justify-center gap-2">
             <h2 className="text-2xl dark:text-white mb-8 font-thin">
-              Dig into the detailed Pro Forma Cap Table for
+              {scenarios.length > 0
+                ? "Dig into the detailed Pro Forma Cap Table for"
+                : "Create an Investment Scenario in order to view its Pro Forma Cap Table"}
             </h2>
-            <Select
-              id="Scenario"
-              sizing="sm"
-              className=""
-              value={activeScenario}
-              onChange={handleActiveScenarioInputChange}
-            >
-              {scenarios.map((capTable, index) => (
-                <option value={index} key={index}>
-                  {capTable.organization.description}:{" "}
-                  {prettyUSD(capTable.organization.newMoneyRaised)} @{" "}
-                  {prettyUSD(capTable.organization.preMoneyValuation)}
-                </option>
-              ))}
-            </Select>
+            {scenarios.length > 0 && (
+              <Select
+                id="Scenario"
+                sizing="sm"
+                className=""
+                value={activeScenario}
+                onChange={handleActiveScenarioInputChange}
+              >
+                {scenarios.map((capTable, index) => (
+                  <option value={index} key={index}>
+                    {capTable.organization.description}:{" "}
+                    {prettyUSD(capTable.organization.newMoneyRaised)} @{" "}
+                    {prettyUSD(capTable.organization.preMoneyValuation)}
+                  </option>
+                ))}
+              </Select>
+            )}
           </div>
 
-          <div className="flex justify-center">
-            <Card className="w-full lg:w-3/4 min-w-fit">
-              <ProFormaCapTable capTable={scenarios[activeScenario]} />
-              <div className="flex gap-2 my-2 justify-end" role="group">
-                <Button
-                  size="sm"
-                  color="gray"
-                  onClick={() => props.tabsRef.current?.setActiveTab(3)}
-                >
-                  <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
-                  <p>Back</p>
-                </Button>
-                <Button
-                  size="sm"
-                  color="gray"
-                  onClick={() => handleCopy("#proFormaCapTable")}
-                >
-                  <TbCopy className="mr-2 h-5 w-5" />
-                  <p>Copy</p>
-                </Button>
-              </div>
-            </Card>
-          </div>
+          {scenarios.length > 0 && (
+            <div className="flex justify-center">
+              <Card className="w-full lg:w-3/4 min-w-fit">
+                <ProFormaCapTable capTable={scenarios[activeScenario]} />
+                <div className="flex gap-2 my-2 justify-end" role="group">
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => props.tabsRef.current?.setActiveTab(3)}
+                  >
+                    <TbSquareRoundedArrowLeft className="mr-2 h-5 w-5" />
+                    <p>Back</p>
+                  </Button>
+                  <Button
+                    size="sm"
+                    color="gray"
+                    onClick={() => handleCopy("#proFormaCapTable")}
+                  >
+                    <TbCopy className="mr-2 h-5 w-5" />
+                    <p>Copy</p>
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
         </Tabs.Item>
       </Tabs.Group>
     </div>
