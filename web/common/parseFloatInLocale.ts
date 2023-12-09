@@ -1,7 +1,4 @@
-export default (
-  numberInLocale: string,
-  locale?: string
-): number | undefined => {
+export default (numberInLocale: string, locale?: string): number => {
   // Get the thousands and decimal separator characters used in the locale.
   let [, thousandsSeparator, , , , decimalSeparator] = (1111.1).toLocaleString(
     locale

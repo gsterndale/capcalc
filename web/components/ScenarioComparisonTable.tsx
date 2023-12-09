@@ -257,9 +257,9 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
                   sizing="sm"
                   type="text"
                   onChange={(e) => {
-                    e.target.value =
-                      parseFloatInLocale(e.target.value)?.toLocaleString() ||
-                      "";
+                    e.target.value = (
+                      parseFloatInLocale(e.target.value) || ""
+                    )?.toLocaleString();
                   }}
                   name="newMoneyRaised"
                   icon={TbCurrencyDollar}
@@ -290,9 +290,9 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
                   sizing="sm"
                   type="text"
                   onChange={(e) => {
-                    e.target.value =
-                      parseFloatInLocale(e.target.value)?.toLocaleString() ||
-                      "";
+                    e.target.value = (
+                      parseFloatInLocale(e.target.value) || ""
+                    )?.toLocaleString();
                   }}
                   name="preMoneyValuation"
                   icon={TbCurrencyDollar}
