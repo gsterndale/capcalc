@@ -123,7 +123,7 @@ const ProFormaCapTable: React.FC<AppProps> = (props: AppProps) => {
           </Table.Row>
         ))}
       </Table.Body>
-      <tfoot className="text-right border-t">
+      <Table.Body className="text-right border-t">
         <Table.Row>
           <Table.Cell></Table.Cell>
           <Table.Cell>
@@ -146,7 +146,7 @@ const ProFormaCapTable: React.FC<AppProps> = (props: AppProps) => {
           </Table.Cell>
           <Table.Cell></Table.Cell>
         </Table.Row>
-      </tfoot>
+      </Table.Body>
     </Table>
   );
 };

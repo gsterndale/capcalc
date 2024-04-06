@@ -239,7 +239,7 @@ const App: React.FC = () => {
         </p>
       </div>
 
-      <Tabs.Group
+      <Tabs
         aria-label="Tabs"
         style="underline"
         className="justify-center min-w-fit"
@@ -472,7 +472,7 @@ const App: React.FC = () => {
             </div>
           )}
         </Tabs.Item>
-      </Tabs.Group>
+      </Tabs>
     </div>
   );
 };
