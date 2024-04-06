@@ -347,7 +347,11 @@ const ScenarioComparisonTable: React.FC<AppProps> = (props: AppProps) => {
                 </Table.Cell>
               ))}
               <Table.Cell>
-                <Checkbox name="noteConversion" id="noteConversion" />
+                <Checkbox
+                  name="noteConversion"
+                  id="noteConversion"
+                  checked={true}
+                />
               </Table.Cell>
             </Table.Row>
             <Table.Row>
