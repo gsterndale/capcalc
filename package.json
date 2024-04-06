@@ -12,6 +12,6 @@
     "web"
   ],
   "devDependencies": {
-    "typescript": "^5.0.4"
+    "typescript": "^5.4.4"
   }
 }
