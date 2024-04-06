@@ -48,14 +48,15 @@ describe("a uncapped note without interest", () => {
 
 describe("a uncapped note with interest", () => {
   const rate = 0.06;
-  const fiveYearsAgo = new Date();
-  fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+  const thisYear = new Date("December 17, 2023 03:24:00");
+  const fiveYearsAgo = new Date("December 17, 2018 03:24:00");
 
   const note = AbstractNoteFactory.create({
     conversionDiscount: discount,
     principalInvested: principal,
     interestRate: rate,
     interestStartDate: fiveYearsAgo,
+    conversionDate: thisYear,
   });
 
   test("conversionAmount() is the principal + simple interest", () => {
